@@ -67,9 +67,9 @@ export function Navbar({ customLinks }: NavbarProps) {
         className={`sticky top-0 z-50 w-full transition-all duration-500 ${
           scrolled
             ? isLightBg
-              ? "bg-beige-50/90 backdrop-blur-2xl border-b border-charcoal-900/10 shadow-lg py-3 text-charcoal-900"
-              : "bg-forest-950/90 backdrop-blur-2xl border-b border-solar-400/20 shadow-2xl py-3 text-white"
-            : "bg-forest-950/40 backdrop-blur-md border-b border-white/5 py-4 sm:py-5 text-white"
+              ? "bg-beige-50/95 backdrop-blur-2xl border-b border-charcoal-900/10 shadow-lg py-3 text-charcoal-900"
+              : "bg-forest-950/95 backdrop-blur-2xl border-b border-solar-400/20 shadow-2xl py-3 text-white"
+            : "bg-forest-950/95 backdrop-blur-xl border-b border-white/10 py-4 sm:py-5 text-white"
         }`}
       >
         <Container size="xl" padding="normal">
