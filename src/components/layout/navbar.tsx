@@ -73,7 +73,7 @@ export function Navbar() {
             />
 
             {/* Desktop Navigation Links (Clean layout without quote button) */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden md:flex items-center gap-5 lg:gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
@@ -89,10 +89,10 @@ export function Navbar() {
               ))}
             </nav>
 
-            {/* Mobile menu button */}
+            {/* Mobile menu button (only on small screens < 768px) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden p-2 rounded-lg transition-colors ${
+              className={`md:hidden p-2 rounded-lg transition-colors ${
                 isLightBg
                   ? "text-charcoal-900 hover:bg-black/5"
                   : "text-white hover:bg-white/10"
@@ -106,7 +106,7 @@ export function Navbar() {
           {/* Mobile menu dropdown */}
           {mobileMenuOpen && (
             <div
-              className={`lg:hidden pt-4 pb-6 mt-4 border-t flex flex-col gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200 ${
+              className={`md:hidden pt-4 pb-6 mt-4 border-t flex flex-col gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200 ${
                 isLightBg ? "border-charcoal-900/10" : "border-white/10"
               }`}
             >
