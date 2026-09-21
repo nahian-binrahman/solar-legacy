@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/core/container";
-import { Menu, X, ArrowUpRight, SunMedium } from "lucide-react";
+import { Menu, X, ArrowUpRight } from "lucide-react";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -39,9 +40,15 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo Area */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-forest-900 border border-solar-400/40 shadow-sm transition-transform duration-300 group-hover:scale-105">
-              <SunMedium className="w-5 h-5 text-solar-400 transition-transform duration-500 group-hover:rotate-45" />
-              <div className="absolute inset-0 rounded-xl bg-solar-400/10 blur-xs -z-10" />
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shadow-sm transition-transform duration-300 group-hover:scale-105">
+              <Image
+                src="/logo.webp"
+                alt="Solar Legacy Logo"
+                width={40}
+                height={40}
+                className="w-full h-full object-contain"
+                priority
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-heading font-extrabold text-lg sm:text-xl tracking-tight text-white flex items-center gap-1.5">

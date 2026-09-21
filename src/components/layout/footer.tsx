@@ -1,8 +1,9 @@
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/core/container";
 import { Badge } from "@/components/ui/badge";
-import { SunMedium, ShieldCheck, Zap, Award } from "lucide-react";
+import { ShieldCheck, Zap, Award } from "lucide-react";
 
 export function Footer() {
   return (
@@ -12,8 +13,14 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-3 w-fit">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-forest-900 border border-solar-400/40">
-                <SunMedium className="w-5 h-5 text-solar-400" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shadow-sm">
+                <Image
+                  src="/logo.webp"
+                  alt="Solar Legacy Logo"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="font-heading font-extrabold text-xl tracking-tight text-white">
