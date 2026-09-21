@@ -62,6 +62,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       }))
     : defaultStats;
 
+  const [bgSrc, setBgSrc] = React.useState(content?.bgImageUrl || "/hero-solar.jpg");
+
+  React.useEffect(() => {
+    if (content?.bgImageUrl) setBgSrc(content.bgImageUrl);
+  }, [content?.bgImageUrl]);
+
   return (
     <section
       id="home"
@@ -73,18 +79,19 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         className="absolute inset-[-10%] z-0 select-none overflow-hidden"
       >
         <Image
-          src={content?.bgImageUrl || "/hero-solar.jpg"}
+          src={bgSrc}
           alt="Luxury modern estate with solar panels"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center brightness-90 contrast-105 scale-105"
+          className="object-cover object-center brightness-95 contrast-105 scale-105"
+          onError={() => setBgSrc("/hero-solar.jpg")}
         />
       </motion.div>
 
       {/* 2. Dark Luxury Gradient Overlays (z-1) */}
-      <div className="absolute inset-0 z-1 bg-gradient-to-r from-forest-950/95 via-forest-950/85 to-forest-950/60" />
-      <div className="absolute inset-0 z-1 bg-gradient-to-t from-forest-950 via-forest-950/30 to-forest-950/80" />
+      <div className="absolute inset-0 z-1 bg-gradient-to-r from-forest-950/90 via-forest-950/65 to-forest-950/35" />
+      <div className="absolute inset-0 z-1 bg-gradient-to-t from-forest-950 via-forest-950/15 to-forest-950/60" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-solar-400/15 blur-[140px] rounded-full pointer-events-none z-1" />
 
       {/* 3. Hero Content (z-10) */}
