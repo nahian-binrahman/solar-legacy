@@ -101,8 +101,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#components" className="hover:text-solar-300 transition-colors">
-                  Design System Specs
+                <Link href="#architecture" className="hover:text-solar-300 transition-colors">
+                  System Architecture
                 </Link>
               </li>
               <li>
