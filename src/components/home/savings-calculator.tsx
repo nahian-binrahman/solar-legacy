@@ -64,7 +64,7 @@ export function SavingsCalculator() {
         </div>
 
         {/* Fintech Dashboard Card */}
-        <div className="max-w-5xl mx-auto rounded-3xl bg-forest-900/60 backdrop-blur-2xl border border-white/15 p-6 sm:p-10 shadow-2xl">
+        <div className="max-w-5xl mx-auto rounded-3xl bg-forest-900/60 backdrop-blur-2xl border border-white/15 p-5 sm:p-10 shadow-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Input Controls */}
             <div className="lg:col-span-5 flex flex-col gap-6">
@@ -77,7 +77,7 @@ export function SavingsCalculator() {
                   <span className="text-xs font-mono text-solar-400">Current Tariff</span>
                 </div>
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="font-heading font-extrabold text-4xl text-white">
+                  <span className="font-heading font-extrabold text-3xl sm:text-4xl text-white">
                     ${bill}
                   </span>
                   <span className="text-xs text-beige-400">/ month</span>
@@ -90,7 +90,7 @@ export function SavingsCalculator() {
                   step="25"
                   value={bill}
                   onChange={(e) => setBill(Number(e.target.value))}
-                  className="w-full h-2 bg-forest-950 rounded-lg appearance-none cursor-pointer accent-solar-400"
+                  className="w-full h-2.5 bg-forest-950 rounded-lg appearance-none cursor-pointer accent-solar-400"
                 />
                 <div className="flex justify-between text-[11px] text-beige-400 font-mono mt-1">
                   <span>$150</span>
@@ -117,7 +117,7 @@ export function SavingsCalculator() {
                         key={item.id}
                         type="button"
                         onClick={() => setPropertyType(item.id)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                        className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                           active
                             ? "bg-solar-400 text-forest-950 border-solar-300 shadow-md font-bold"
                             : "bg-forest-950/60 text-beige-300 border-white/10 hover:border-white/20"
@@ -157,11 +157,11 @@ export function SavingsCalculator() {
             {/* Live Results Dashboard */}
             <div className="lg:col-span-7 flex flex-col gap-4">
               {/* Primary 25-Year Metric */}
-              <div className="p-6 sm:p-7 rounded-2xl bg-forest-950/85 border border-solar-400/40 shadow-xl relative overflow-hidden">
+              <div className="p-5 sm:p-7 rounded-2xl bg-forest-950/85 border border-solar-400/40 shadow-xl relative overflow-hidden">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-solar-400 flex items-center gap-1.5 font-heading">
                     <TrendingUp className="w-4 h-4" />
-                    25-Year Net Projected Savings
+                    25-Year Projected Savings
                   </span>
                   <Badge variant="solarSolid" size="sm">
                     High ROI
@@ -172,7 +172,7 @@ export function SavingsCalculator() {
                   initial={{ scale: 0.96, opacity: 0.6 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.2 }}
-                  className="font-heading font-extrabold text-4xl sm:text-5xl text-white tracking-tight"
+                  className="font-heading font-extrabold text-3xl sm:text-5xl text-white tracking-tight"
                 >
                   ${twentyFiveYearProjection.toLocaleString()}
                 </motion.div>
@@ -182,24 +182,24 @@ export function SavingsCalculator() {
               </div>
 
               {/* Grid of 3 supporting outputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div className="p-4 rounded-xl bg-forest-950/60 border border-white/10">
-                  <span className="text-[11px] text-beige-400 block mb-1">Estimated Monthly</span>
-                  <span className="font-heading font-bold text-xl text-solar-300">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3.5 text-center sm:text-left">
+                <div className="p-2.5 sm:p-4 rounded-xl bg-forest-950/60 border border-white/10">
+                  <span className="text-[10px] sm:text-[11px] text-beige-400 block mb-1">Monthly</span>
+                  <span className="font-heading font-bold text-sm sm:text-xl text-solar-300">
                     ${monthlySavings.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-forest-950/60 border border-white/10">
-                  <span className="text-[11px] text-beige-400 block mb-1">Annual Savings</span>
-                  <span className="font-heading font-bold text-xl text-white">
+                <div className="p-2.5 sm:p-4 rounded-xl bg-forest-950/60 border border-white/10">
+                  <span className="text-[10px] sm:text-[11px] text-beige-400 block mb-1">Annual</span>
+                  <span className="font-heading font-bold text-sm sm:text-xl text-white">
                     ${annualSavings.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-forest-950/60 border border-white/10">
-                  <span className="text-[11px] text-beige-400 block mb-1">Lifetime Clean kWh</span>
-                  <span className="font-heading font-bold text-xl text-solar-300">
+                <div className="p-2.5 sm:p-4 rounded-xl bg-forest-950/60 border border-white/10">
+                  <span className="text-[10px] sm:text-[11px] text-beige-400 block mb-1">Clean Energy</span>
+                  <span className="font-heading font-bold text-sm sm:text-xl text-solar-300">
                     {(lifetimeCleanKwh / 1000).toFixed(0)}k kWh
                   </span>
                 </div>
@@ -210,8 +210,11 @@ export function SavingsCalculator() {
                 <Button
                   variant="solar"
                   size="default"
-                  className="w-full justify-center font-bold text-forest-950 gap-2 shadow-lg shadow-solar-400/20"
-                  onClick={() => alert(`Consultation requested for $${bill}/mo plan!`)}
+                  className="w-full justify-center font-bold text-forest-950 gap-2 shadow-lg shadow-solar-400/20 h-12 text-xs sm:text-base cursor-pointer"
+                  onClick={() => {
+                    const el = document.getElementById("contact");
+                    el?.scrollIntoView({ behavior: "smooth" });
+                  }}
                 >
                   <span>Lock In Your Custom System Quote</span>
                   <ArrowRight className="w-4 h-4" />

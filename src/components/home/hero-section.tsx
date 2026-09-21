@@ -108,13 +108,16 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       </motion.div>
 
       {/* 2. Dark Luxury Gradient Overlays (z-1) */}
-      <div className="absolute inset-0 z-1 bg-gradient-to-r from-forest-950/90 via-forest-950/65 to-forest-950/35" />
+      {/* Mobile-optimized vertical vignette overlay */}
+      <div className="md:hidden absolute inset-0 z-1 bg-gradient-to-b from-forest-950/85 via-forest-950/40 to-forest-950/95" />
+      {/* Desktop horizontal overlay */}
+      <div className="hidden md:block absolute inset-0 z-1 bg-gradient-to-r from-forest-950/90 via-forest-950/65 to-forest-950/35" />
       <div className="absolute inset-0 z-1 bg-gradient-to-t from-forest-950 via-forest-950/15 to-forest-950/60" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-solar-400/15 blur-[140px] rounded-full pointer-events-none z-1" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[350px] sm:w-[700px] h-[300px] sm:h-[500px] bg-solar-400/15 blur-[100px] sm:blur-[140px] rounded-full pointer-events-none z-1" />
 
       {/* 3. Hero Content (z-10) */}
-      <Container size="xl" padding="normal" className="py-16 sm:py-24 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+      <Container size="xl" padding="normal" className="pt-28 pb-16 sm:py-24 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
           {/* Main Hero Copy */}
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             {/* Pill Badge */}
@@ -122,7 +125,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="mb-5"
+              className="mb-4 sm:mb-5"
             >
               <Badge
                 variant="glass"
@@ -130,7 +133,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 dot
                 dotColor="solar"
                 pulse
-                className="border-solar-400/40 text-beige-100 px-4 py-1.5 shadow-lg bg-forest-950/80 backdrop-blur-md"
+                className="border-solar-400/40 text-beige-100 px-3.5 sm:px-4 py-1.5 shadow-lg bg-forest-950/80 backdrop-blur-md text-xs"
               >
                 {content?.badge || "Next-Gen Architectural Solar & Intelligent Storage"}
               </Badge>
@@ -141,7 +144,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight text-white leading-[1.08] mb-6"
+              className="font-heading font-extrabold text-[2.15rem] xs:text-4xl sm:text-6xl lg:text-7xl tracking-tight text-white leading-[1.12] mb-5 sm:mb-6"
             >
               {content?.title ? (
                 content.title
@@ -160,7 +163,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base sm:text-xl text-beige-200 font-sans max-w-2xl leading-relaxed mb-9 font-light"
+              className="text-sm sm:text-xl text-beige-200 font-sans max-w-2xl leading-relaxed mb-7 sm:mb-9 font-light"
             >
               {content?.subtitle ||
                 "We design and install customized high-efficiency solar arrays and intelligent battery storage systems engineered to elevate architectural aesthetics, eliminate grid vulnerability, and secure long-term energy independence."}
@@ -171,12 +174,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto"
             >
               <Button
                 variant="solar"
                 size="lg"
-                className="font-bold text-forest-950 shadow-xl shadow-solar-400/25 group cursor-pointer"
+                className="font-bold text-forest-950 shadow-xl shadow-solar-400/25 group cursor-pointer h-12 sm:h-14 text-sm sm:text-base justify-center"
                 onClick={() => {
                   const el = document.getElementById("quote");
                   el?.scrollIntoView({ behavior: "smooth" });
@@ -189,7 +192,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               <Button
                 variant="forestOutline"
                 size="lg"
-                className="border-white/20 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-sm"
+                className="border-white/20 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-sm h-12 sm:h-14 text-sm sm:text-base justify-center"
                 onClick={() => {
                   const el = document.getElementById("solutions");
                   el?.scrollIntoView({ behavior: "smooth" });
@@ -205,25 +208,25 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.4 }}
-              className="flex flex-wrap items-center gap-5 mt-10 pt-8 border-t border-white/10 text-xs sm:text-sm text-beige-300"
+              className="flex flex-wrap items-center gap-2.5 sm:gap-5 mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/10 text-xs sm:text-sm text-beige-300"
             >
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-solar-400" />
+              <div className="flex items-center gap-2 bg-forest-900/40 md:bg-transparent px-3 py-1.5 md:p-0 rounded-full border border-white/5 md:border-none">
+                <ShieldCheck className="w-4 h-4 text-solar-400 shrink-0" />
                 <span>25-Year Production Warranty</span>
               </div>
-              <div className="flex items-center gap-2">
-                <BatteryCharging className="w-4 h-4 text-solar-400" />
+              <div className="flex items-center gap-2 bg-forest-900/40 md:bg-transparent px-3 py-1.5 md:p-0 rounded-full border border-white/5 md:border-none">
+                <BatteryCharging className="w-4 h-4 text-solar-400 shrink-0" />
                 <span>Solid-State Battery Ready</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Sun className="w-4 h-4 text-solar-400" />
+              <div className="flex items-center gap-2 bg-forest-900/40 md:bg-transparent px-3 py-1.5 md:p-0 rounded-full border border-white/5 md:border-none">
+                <Sun className="w-4 h-4 text-solar-400 shrink-0" />
                 <span>Tier-1 Monocrystalline Cells</span>
               </div>
             </motion.div>
           </div>
 
           {/* Floating Statistics Cards with Framer Motion */}
-          <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5 w-full">
+          <div className="lg:col-span-5 flex flex-col gap-3.5 sm:gap-5 w-full">
             {stats.map((stat) => {
               const IconComponent = stat.icon;
               return (
@@ -233,24 +236,24 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: stat.delay, ease: "easeOut" }}
                   whileHover={{ scale: 1.02, x: -4 }}
-                  className="group relative overflow-hidden rounded-2xl p-5 sm:p-6 bg-forest-950/80 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-2xl hover:shadow-solar-400/10"
+                  className="group relative overflow-hidden rounded-2xl p-4 sm:p-6 bg-forest-950/80 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-2xl hover:shadow-solar-400/10"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-forest-900/90 border border-solar-400/30 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm">
-                        <IconComponent className="w-6 h-6" />
+                    <div className="flex items-center gap-3.5 sm:gap-4">
+                      <div className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-forest-900/90 border border-solar-400/30 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm shrink-0">
+                        <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
                       <div className="flex flex-col">
                         <span className="font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-tight group-hover:text-solar-300 transition-colors">
                           {stat.value}
                         </span>
-                        <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-beige-300 font-sans">
+                        <span className="text-[11px] sm:text-sm font-semibold uppercase tracking-wider text-beige-300 font-sans">
                           {stat.label}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-beige-400 mt-2.5 pl-16">
+                  <p className="text-xs text-beige-400 mt-2 sm:mt-2.5 pl-14 sm:pl-16 font-light leading-relaxed">
                     {stat.detail}
                   </p>
                   {/* Subtle hover accent bar */}

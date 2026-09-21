@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/core/container";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X, Phone, Sparkles } from "lucide-react";
 
 import { NavLinkItem } from "@/types/content";
 
@@ -116,37 +116,52 @@ export function Navbar({ customLinks }: NavbarProps) {
           {/* Mobile menu dropdown */}
           {mobileMenuOpen && (
             <div
-              className={`md:hidden pt-4 pb-6 mt-4 border-t flex flex-col gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200 ${
-                isLightBg ? "border-charcoal-900/10" : "border-white/10"
+              className={`md:hidden p-5 mt-4 rounded-2xl border shadow-2xl backdrop-blur-2xl flex flex-col gap-2 animate-in fade-in slide-in-from-top-3 duration-200 ${
+                isLightBg
+                  ? "bg-beige-50/98 border-charcoal-900/10 shadow-charcoal-900/10"
+                  : "bg-forest-950/98 border-solar-400/25 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
               }`}
             >
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`text-base font-medium transition-colors py-1 ${
-                    isLightBg
-                      ? "text-charcoal-800 hover:text-solar-600"
-                      : "text-beige-100 hover:text-solar-300"
-                  }`}
+              <div className="flex flex-col gap-1 pb-2">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-base font-medium transition-all py-2.5 px-3 rounded-xl flex items-center justify-between group ${
+                      isLightBg
+                        ? "text-charcoal-800 hover:text-solar-600 hover:bg-black/5"
+                        : "text-beige-100 hover:text-solar-300 hover:bg-forest-900/70"
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    <span className="text-xs text-solar-400/60 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Direct call & CTA */}
+              <div className="pt-3 border-t border-white/10 flex flex-col gap-2.5">
+                <a
+                  href="tel:+18005557652"
+                  className="flex items-center justify-center gap-2 py-2 text-xs font-semibold tracking-wider uppercase text-solar-300 hover:text-solar-200 transition-colors"
                 >
-                  {link.name}
-                </Link>
-              ))}
-              <div className="pt-2">
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Call Direct: +1 (800) 555-7652</span>
+                </a>
+
                 <Button
                   variant="solar"
                   size="default"
-                  className="w-full justify-center font-bold text-forest-950"
+                  className="w-full justify-center font-bold text-forest-950 h-11 rounded-xl shadow-lg shadow-solar-400/20 text-xs sm:text-sm"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     const el = document.getElementById("quote");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <span>Get Solar Quote</span>
-                  <ArrowUpRight className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-forest-950" />
+                  <span>Request Architectural Assessment</span>
                 </Button>
               </div>
             </div>
