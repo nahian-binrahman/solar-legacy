@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Inter } from "next/font/google";
+import { MobileStickyCTA } from "@/components/layout/mobile-sticky-cta";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -138,8 +139,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
         />
       </head>
-      <body className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-solar-300 selection:text-forest-950">
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-solar-300 selection:text-forest-950 pb-16 lg:pb-0">
         {children}
+        <MobileStickyCTA />
       </body>
     </html>
   );
