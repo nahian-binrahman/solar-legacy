@@ -17,8 +17,15 @@ import {
   Calendar,
 } from "lucide-react";
 
-export function ProjectsSection() {
-  const projects = [
+import { ProjectItem, StatItem } from "@/types/content";
+
+interface ProjectsSectionProps {
+  projectsData?: ProjectItem[];
+  statsData?: StatItem[];
+}
+
+export function ProjectsSection({ projectsData, statsData }: ProjectsSectionProps) {
+  const defaultProjects = [
     {
       title: "The Pacific Cliffside Estate",
       category: "Residential Rooftop",
@@ -45,12 +52,29 @@ export function ProjectsSection() {
     },
   ];
 
-  const stats = [
-    { value: "15+", label: "Years Experience", icon: Calendar },
-    { value: "12,500+", label: "Projects Completed", icon: Award },
-    { value: "99.4%", label: "Customer Satisfaction", icon: Users },
-    { value: "28", label: "States Served", icon: ShieldCheck },
-  ];
+  const projects = projectsData
+    ? projectsData.map((p) => ({
+        title: p.title,
+        category: p.category,
+        image: p.image || "/hero-solar.jpg",
+        location: p.location,
+        systemSize: p.size,
+        energyImpact: p.impact,
+      }))
+    : defaultProjects;
+
+  const stats = statsData
+    ? statsData.map((s, idx) => ({
+        value: s.value,
+        label: s.label,
+        icon: [Calendar, Award, Users, ShieldCheck][idx % 4] || Award,
+      }))
+    : [
+        { value: "15+", label: "Years Experience", icon: Calendar },
+        { value: "12,500+", label: "Projects Completed", icon: Award },
+        { value: "99.4%", label: "Customer Satisfaction", icon: Users },
+        { value: "28", label: "States Served", icon: ShieldCheck },
+      ];
 
   return (
     <Section id="projects" spacing="lg" background="white" className="border-b border-beige-200">

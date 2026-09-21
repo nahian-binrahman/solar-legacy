@@ -8,7 +8,13 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 
-export function Navbar() {
+import { NavLinkItem } from "@/types/content";
+
+interface NavbarProps {
+  customLinks?: NavLinkItem[];
+}
+
+export function Navbar({ customLinks }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const [isLightBg, setIsLightBg] = React.useState(false);
@@ -41,7 +47,7 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
+  const defaultLinks = [
     { name: "Home", href: "#home" },
     { name: "About", href: "#about" },
     { name: "Solutions", href: "#solutions" },
@@ -49,6 +55,10 @@ export function Navbar() {
     { name: "Resources", href: "#resources" },
     { name: "Contact", href: "#contact" },
   ];
+
+  const navLinks = customLinks
+    ? customLinks.filter((l) => l.isVisible).map((l) => ({ name: l.label, href: l.href }))
+    : defaultLinks;
 
   return (
     <>

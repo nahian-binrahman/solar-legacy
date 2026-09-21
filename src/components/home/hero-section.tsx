@@ -17,12 +17,18 @@ import {
   BatteryCharging,
 } from "lucide-react";
 
-export function HeroSection() {
+import { HeroContent, StatItem } from "@/types/content";
+
+interface HeroSectionProps {
+  content?: HeroContent;
+  statsData?: StatItem[];
+}
+
+export function HeroSection({ content, statsData }: HeroSectionProps) {
   const { scrollY } = useScroll();
   const yBg = useTransform(scrollY, [0, 800], [0, 180]);
-  const yContent = useTransform(scrollY, [0, 800], [0, 80]);
 
-  const stats = [
+  const defaultStats = [
     {
       value: "10,000+",
       label: "Installations",
@@ -46,6 +52,16 @@ export function HeroSection() {
     },
   ];
 
+  const stats = statsData && statsData.length >= 3
+    ? statsData.slice(0, 3).map((s, idx) => ({
+        value: s.value,
+        label: s.label,
+        icon: [Zap, MapPin, TrendingDown][idx] || Zap,
+        detail: s.description || "Architectural solar integration",
+        delay: 0.25 + idx * 0.1,
+      }))
+    : defaultStats;
+
   return (
     <section
       id="home"
@@ -57,7 +73,7 @@ export function HeroSection() {
         className="absolute inset-[-10%] z-0 select-none overflow-hidden"
       >
         <Image
-          src="/hero-solar.jpg"
+          src={content?.bgImageUrl || "/hero-solar.jpg"}
           alt="Luxury modern estate with solar panels"
           fill
           priority
@@ -91,7 +107,7 @@ export function HeroSection() {
                 pulse
                 className="border-solar-400/40 text-beige-100 px-4 py-1.5 shadow-lg bg-forest-950/80 backdrop-blur-md"
               >
-                Next-Gen Architectural Solar & Intelligent Storage
+                {content?.badge || "Next-Gen Architectural Solar & Intelligent Storage"}
               </Badge>
             </motion.div>
 
@@ -102,10 +118,16 @@ export function HeroSection() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight text-white leading-[1.08] mb-6"
             >
-              Power Today.{" "}
-              <span className="solar-gradient-text block sm:inline">
-                Build Your Legacy.
-              </span>
+              {content?.title ? (
+                content.title
+              ) : (
+                <>
+                  Power Today.{" "}
+                  <span className="solar-gradient-text block sm:inline">
+                    Build Your Legacy.
+                  </span>
+                </>
+              )}
             </motion.h1>
 
             {/* Supporting Text */}
@@ -115,9 +137,8 @@ export function HeroSection() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-base sm:text-xl text-beige-200 font-sans max-w-2xl leading-relaxed mb-9 font-light"
             >
-              We design and install customized high-efficiency solar arrays and
-              intelligent battery storage systems engineered to elevate architectural
-              aesthetics, eliminate grid vulnerability, and secure long-term energy independence.
+              {content?.subtitle ||
+                "We design and install customized high-efficiency solar arrays and intelligent battery storage systems engineered to elevate architectural aesthetics, eliminate grid vulnerability, and secure long-term energy independence."}
             </motion.p>
 
             {/* Primary & Secondary CTAs */}

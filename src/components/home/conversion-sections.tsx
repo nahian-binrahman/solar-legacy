@@ -21,8 +21,24 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export function ConversionSections() {
-  const testimonials = [
+import { TestimonialItem, FAQItem } from "@/types/content";
+
+interface ConversionSectionsProps {
+  testimonialsData?: TestimonialItem[];
+  faqsData?: FAQItem[];
+  showTestimonials?: boolean;
+  showFaq?: boolean;
+  showContact?: boolean;
+}
+
+export function ConversionSections({
+  testimonialsData,
+  faqsData,
+  showTestimonials = true,
+  showFaq = true,
+  showContact = true,
+}: ConversionSectionsProps) {
+  const defaultTestimonials = [
     {
       name: "Arthur Pendelton",
       role: "Architectural Estate Owner",
@@ -52,7 +68,18 @@ export function ConversionSections() {
     },
   ];
 
-  const faqs = [
+  const testimonials = testimonialsData
+    ? testimonialsData.map((t) => ({
+        name: t.name,
+        role: t.role,
+        location: t.company,
+        initials: t.name.split(" ").map((n) => n[0]).join("").slice(0, 2),
+        rating: t.rating,
+        review: t.review,
+      }))
+    : defaultTestimonials;
+
+  const defaultFaqs = [
     {
       question: "Is my home suitable for solar?",
       answer:
@@ -75,9 +102,14 @@ export function ConversionSections() {
     },
   ];
 
+  const faqs = faqsData
+    ? faqsData.map((f) => ({ question: f.question, answer: f.answer }))
+    : defaultFaqs;
+
   return (
     <>
       {/* 1. Testimonials Section */}
+      {showTestimonials && (
       <Section id="resources" spacing="lg" background="white" className="border-b border-beige-200">
         <Container size="xl" padding="normal">
           <div className="text-center max-w-2xl mx-auto mb-14">
@@ -138,9 +170,11 @@ export function ConversionSections() {
           </div>
         </Container>
       </Section>
+      )}
 
       {/* 2. FAQ Section */}
-      <Section spacing="lg" background="forestDeep" className="text-white relative overflow-hidden">
+      {showFaq && (
+      <Section id="faq" spacing="lg" background="forestDeep" className="text-white relative overflow-hidden">
         <Container size="lg" padding="normal">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <Badge variant="glass" size="sm" dot dotColor="solar" pulse className="mb-3 text-solar-300 border-solar-400/30">
@@ -166,8 +200,10 @@ export function ConversionSections() {
           </div>
         </Container>
       </Section>
+      )}
 
       {/* 3. Final High-Conversion CTA Section */}
+      {showContact && (
       <Section id="contact" spacing="xl" background="forestDeep" className="relative text-white border-t border-forest-800">
         <div className="absolute inset-0 bg-gradient-to-b from-forest-900/70 via-forest-950 to-forest-950 -z-10" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-solar-400/15 blur-[150px] rounded-full pointer-events-none -z-10" />
@@ -212,6 +248,7 @@ export function ConversionSections() {
           </div>
         </Container>
       </Section>
+      )}
     </>
   );
 }

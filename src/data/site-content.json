@@ -1,0 +1,156 @@
+{
+  "navigation": [
+    { "id": "nav-1", "label": "About", "href": "#about", "order": 1, "isVisible": true },
+    { "id": "nav-2", "label": "Solutions", "href": "#solutions", "order": 2, "isVisible": true },
+    { "id": "nav-3", "label": "How It Works", "href": "#process", "order": 3, "isVisible": true },
+    { "id": "nav-4", "label": "Projects", "href": "#projects", "order": 4, "isVisible": true },
+    { "id": "nav-5", "label": "Architecture", "href": "#architecture", "order": 5, "isVisible": true },
+    { "id": "nav-6", "label": "Calculator", "href": "#calculator", "order": 6, "isVisible": true },
+    { "id": "nav-7", "label": "FAQ", "href": "#faq", "order": 7, "isVisible": true },
+    { "id": "nav-8", "label": "Contact", "href": "#contact", "order": 8, "isVisible": true }
+  ],
+  "hero": {
+    "badge": "Next-Gen Architectural Photovoltaics",
+    "title": "Architectural Solar & Renewable Energy Systems",
+    "subtitle": "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency.",
+    "primaryCtaText": "Request Architectural Assessment",
+    "primaryCtaHref": "#contact",
+    "secondaryCtaText": "Explore Systems",
+    "secondaryCtaHref": "#solutions",
+    "bgImageUrl": "https://images.unsplash.com/photo-1509391365360-2e959784a276?q=80&w=2072&auto=format&fit=crop"
+  },
+  "stats": [
+    { "id": "stat-1", "value": "15+", "label": "Years Experience", "suffix": "", "description": "Continuous innovation in renewable energy" },
+    { "id": "stat-2", "value": "2,400+", "label": "Projects Completed", "suffix": "", "description": "Residential, commercial & microgrids" },
+    { "id": "stat-3", "value": "99.4%", "label": "Customer Satisfaction", "suffix": "", "description": "Independent audited verified client index" },
+    { "id": "stat-4", "value": "38", "label": "States Served", "suffix": "", "description": "Licensed engineering teams nationwide" }
+  ],
+  "services": [
+    {
+      "id": "srv-1",
+      "title": "BIPV Glass & Facades",
+      "description": "Building-Integrated Photovoltaic glazing engineered to replace traditional architectural spandrels with power-generating crystalline substrates.",
+      "icon": "Building",
+      "tag": "Architectural"
+    },
+    {
+      "id": "srv-2",
+      "title": "Microinverter Mesh Arrays",
+      "description": "Per-panel decentralized MPPT maximizing rooftop power conversion even under complex shading, with real-time string diagnostics.",
+      "icon": "Cpu",
+      "tag": "High Efficiency"
+    },
+    {
+      "id": "srv-3",
+      "title": "Utility & Commercial Scale",
+      "description": "Ground-mount and flat-roof installations engineered for high-density commercial yield with integrated three-phase switchgear synchronization.",
+      "icon": "Sun",
+      "tag": "Commercial"
+    },
+    {
+      "id": "srv-4",
+      "title": "Solid-State Storage & Microgrids",
+      "description": "High-voltage lithium iron phosphate (LFP) reserve systems with 4ms grid islanding transition for uncompromised estate autonomy.",
+      "icon": "BatteryCharging",
+      "tag": "Grid Independence"
+    }
+  ],
+  "howItWorks": [
+    { "id": "step-1", "step": "01", "title": "Consultation", "description": "Detailed site assessment, solar radiation analysis, and energy consumption audit with our senior architects.", "icon": "Compass" },
+    { "id": "step-2", "step": "02", "title": "Custom Design", "description": "Photorealistic 3D modeling and CAD engineering tailored specifically to your roofline and architectural aesthetics.", "icon": "DraftingCompass" },
+    { "id": "step-3", "step": "03", "title": "Installation", "description": "Turnkey execution by master certified solar technicians with complete electrical compliance and zero aesthetic compromise.", "icon": "Wrench" },
+    { "id": "step-4", "step": "04", "title": "Monitoring & Support", "description": "24/7 AI-driven yield telemetry, automated warranty claims, and round-the-clock priority technical maintenance.", "icon": "ShieldCheck" }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "title": "Hilltop Minimalist Residence",
+      "category": "Residential",
+      "location": "Aspen, Colorado",
+      "size": "24.8 kW DC",
+      "impact": "38,500 kWh/yr clean generation",
+      "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200&auto=format&fit=crop"
+    },
+    {
+      "id": "proj-2",
+      "title": "Aura Logistics Innovation Center",
+      "category": "Commercial",
+      "location": "Austin, Texas",
+      "size": "650 kW DC",
+      "impact": "940 MWh/yr (82% facility offset)",
+      "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop"
+    },
+    {
+      "id": "proj-3",
+      "title": "Coastal Microgrid & Islanding Reserve",
+      "category": "Battery Storage",
+      "location": "Big Sur, California",
+      "size": "160 kWh LFP Storage",
+      "impact": "100% off-grid resilience for 72 hrs",
+      "image": "https://images.unsplash.com/photo-1508873696983-2df5293cb395?q=80&w=1200&auto=format&fit=crop"
+    }
+  ],
+  "faqs": [
+    {
+      "id": "faq-1",
+      "question": "Is my home suitable for solar?",
+      "answer": "Most homes with an unobstructed southern, western, or eastern roof exposure in sound structural condition are prime candidates. We perform a LiDAR satellite scan to calculate your exact roof pitch, shading metrics, and usable surface area."
+    },
+    {
+      "id": "faq-2",
+      "question": "How much can I save?",
+      "answer": "Clients typically offset 70% to 100% of their utility bill, resulting in $35,000 to $90,000+ in lifetime savings depending on electricity rates, system capacity, and available 30% federal tax incentives."
+    },
+    {
+      "id": "faq-3",
+      "question": "Do batteries work during outages?",
+      "answer": "Yes. Our high-voltage LFP battery configurations feature automated microgrid islanding switchgear that engages in under 4 milliseconds, providing uninterrupted backup power for critical circuits or whole-home loads."
+    },
+    {
+      "id": "faq-4",
+      "question": "How long does installation take?",
+      "answer": "Physical installation typically takes 1 to 3 days for residences and 1 to 3 weeks for commercial sites. The comprehensive timeline from design and municipal permitting to utility grid interconnection is normally 3 to 6 weeks."
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "test-1",
+      "name": "David Sterling",
+      "role": "Architectural Designer",
+      "company": "Sterling & Co. Studio",
+      "review": "Solar Legacy delivered an array that complements our home's modernist aesthetic without clunky visible mounting brackets. Flawless execution and impressive energy offset.",
+      "rating": 5,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
+    },
+    {
+      "id": "test-2",
+      "name": "Elena Vance",
+      "role": "Chief Sustainability Officer",
+      "company": "Vance Industrial Parks",
+      "review": "Our 650 kW commercial system was commissioned ahead of schedule with zero operational disruption. Power generation has already exceeded the financial modeling projections by 11%.",
+      "rating": 5,
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300&auto=format&fit=crop"
+    },
+    {
+      "id": "test-3",
+      "name": "Marcus Holbrook",
+      "role": "Estate Owner",
+      "company": "Napa Valley",
+      "review": "During the recent public power shutoffs, our 160 kWh storage system transitioned seamlessly in milliseconds. The telemetry app and real-time monitoring give total peace of mind.",
+      "rating": 5,
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
+    }
+  ],
+  "sectionVisibility": {
+    "hero": true,
+    "services": true,
+    "howItWorks": true,
+    "projects": true,
+    "statistics": true,
+    "architecture": true,
+    "calculator": true,
+    "testimonials": true,
+    "faq": true,
+    "contact": true
+  }
+}
