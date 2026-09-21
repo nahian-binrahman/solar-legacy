@@ -15,6 +15,7 @@ export interface HeroContent {
   secondaryCtaText: string;
   secondaryCtaHref: string;
   bgImageUrl: string;
+  bgImageUrlMobile?: string;
 }
 
 export interface StatItem {

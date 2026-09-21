@@ -17,7 +17,8 @@
     "primaryCtaHref": "#contact",
     "secondaryCtaText": "Explore Systems",
     "secondaryCtaHref": "#solutions",
-    "bgImageUrl": "/hero-solar.jpg"
+    "bgImageUrl": "/hero-solar.jpg",
+    "bgImageUrlMobile": "/hero-solar-mobile.jpg"
   },
   "stats": [
     { "id": "stat-1", "value": "15+", "label": "Years Experience", "suffix": "", "description": "Continuous innovation in renewable energy" },

@@ -63,10 +63,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     : defaultStats;
 
   const [bgSrc, setBgSrc] = React.useState(content?.bgImageUrl || "/hero-solar.jpg");
+  const [bgMobileSrc, setBgMobileSrc] = React.useState(content?.bgImageUrlMobile || "/hero-solar-mobile.jpg");
 
   React.useEffect(() => {
     if (content?.bgImageUrl) setBgSrc(content.bgImageUrl);
-  }, [content?.bgImageUrl]);
+    if (content?.bgImageUrlMobile) setBgMobileSrc(content.bgImageUrlMobile);
+  }, [content?.bgImageUrl, content?.bgImageUrlMobile]);
 
   return (
     <section
@@ -78,15 +80,31 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         style={{ y: yBg }}
         className="absolute inset-[-10%] z-0 select-none overflow-hidden"
       >
-        <Image
-          src={bgSrc}
-          alt="Luxury modern estate with solar panels"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center brightness-95 contrast-105 scale-105"
-          onError={() => setBgSrc("/hero-solar.jpg")}
-        />
+        {/* Mobile Background Image (< 768px) */}
+        <div className="block md:hidden relative w-full h-full">
+          <Image
+            src={bgMobileSrc}
+            alt="Luxury solar villa estate mobile view"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center brightness-95 contrast-105"
+            onError={() => setBgMobileSrc("/hero-solar-mobile.jpg")}
+          />
+        </div>
+
+        {/* Desktop Background Image (>= 768px) */}
+        <div className="hidden md:block relative w-full h-full">
+          <Image
+            src={bgSrc}
+            alt="Luxury modern estate with solar panels"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center brightness-95 contrast-105 scale-105"
+            onError={() => setBgSrc("/hero-solar.jpg")}
+          />
+        </div>
       </motion.div>
 
       {/* 2. Dark Luxury Gradient Overlays (z-1) */}
