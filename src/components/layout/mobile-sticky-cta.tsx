@@ -6,20 +6,34 @@ import { Phone, ArrowUpRight, SunMedium } from "lucide-react";
 
 export function MobileStickyCTA() {
   const [isVisible, setIsVisible] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
+    const handleResize = () => {
+      // Strictly mobile only (< 768px)
+      setIsMobile(window.innerWidth < 768);
+    };
+
     const handleScroll = () => {
       // Show only after scrolling past hero section (300px)
       setIsVisible(window.scrollY > 300);
     };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
-  if (!isVisible) return null;
+  // Guarantee it never renders in DOM on desktop
+  if (!isVisible || !isMobile) return null;
 
   return (
-    <div className="lg:hidden fixed bottom-3 left-3 right-3 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+    <div className="md:hidden fixed bottom-3 left-3 right-3 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
       <div className="rounded-2xl bg-forest-950/90 backdrop-blur-xl border border-solar-400/30 p-2.5 shadow-2xl flex items-center justify-between gap-2.5">
         {/* Quick Call Button */}
         <a
