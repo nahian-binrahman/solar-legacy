@@ -70,7 +70,7 @@
       "location": "Aspen, Colorado",
       "size": "24.8 kW DC",
       "impact": "38,500 kWh/yr clean generation",
-      "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200&auto=format&fit=crop"
+      "image": "/project-hilltop-residence.jpg"
     },
     {
       "id": "proj-2",
@@ -79,7 +79,7 @@
       "location": "Austin, Texas",
       "size": "650 kW DC",
       "impact": "940 MWh/yr (82% facility offset)",
-      "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop"
+      "image": "/project-aura-logistics.jpg"
     },
     {
       "id": "proj-3",
@@ -88,7 +88,7 @@
       "location": "Big Sur, California",
       "size": "160 kWh LFP Storage",
       "impact": "100% off-grid resilience for 72 hrs",
-      "image": "https://images.unsplash.com/photo-1508873696983-2df5293cb395?q=80&w=1200&auto=format&fit=crop"
+      "image": "/project-coastal-microgrid.jpg"
     }
   ],
   "faqs": [

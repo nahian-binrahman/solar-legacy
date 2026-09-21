@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Container } from "@/components/core/container";
@@ -80,16 +81,23 @@ export default async function HomePage() {
                     className="flex flex-col justify-between border-beige-200"
                   >
                     <div>
-                      <div className="h-48 bg-forest-950 p-6 flex flex-col justify-between relative overflow-hidden">
-                        <div className="absolute right-0 top-0 w-36 h-36 bg-solar-400/10 rounded-full blur-2xl" />
+                      <div className="h-52 bg-forest-950 p-6 flex flex-col justify-between relative overflow-hidden group">
+                        <Image
+                          src="/tier-obsidian-monolith.jpg"
+                          alt="The Obsidian Monolith Solar System"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover object-center group-hover:scale-105 transition-transform duration-500 brightness-80"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-950/65 to-forest-950/30 z-1" />
                         <Badge
                           variant="glass"
                           size="sm"
-                          className="w-fit border-solar-400/30 text-beige-100"
+                          className="w-fit border-solar-400/30 text-beige-100 relative z-2"
                         >
                           Residential Estate
                         </Badge>
-                        <div>
+                        <div className="relative z-2">
                           <h3 className="font-heading font-extrabold text-2xl text-white">
                             The Obsidian Monolith
                           </h3>
@@ -140,26 +148,33 @@ export default async function HomePage() {
                     hoverEffect="glow"
                     className="flex flex-col justify-between relative shadow-xl"
                   >
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                       <Badge variant="solarSolid" size="sm" className="shadow-md">
                         Flagship Estate System
                       </Badge>
                     </div>
 
                     <div>
-                      <div className="h-48 bg-forest-900 p-6 flex flex-col justify-between relative overflow-hidden">
-                        <div className="absolute right-0 top-0 w-44 h-44 bg-solar-400/20 rounded-full blur-2xl" />
+                      <div className="h-52 bg-forest-900 p-6 flex flex-col justify-between relative overflow-hidden group">
+                        <Image
+                          src="/tier-microgrid-bifacial.jpg"
+                          alt="Solar Legacy Micro-Grid System"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover object-center group-hover:scale-105 transition-transform duration-500 brightness-80"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-950/65 to-forest-950/30 z-1" />
                         <Badge
                           variant="solar"
                           size="sm"
                           dot
                           dotColor="solar"
                           pulse
-                          className="w-fit border-solar-400/40 text-white"
+                          className="w-fit border-solar-400/40 text-white relative z-2"
                         >
                           Bifacial Active
                         </Badge>
-                        <div>
+                        <div className="relative z-2">
                           <h3 className="font-heading font-extrabold text-2xl text-white">
                             Solar Legacy Micro-Grid
                           </h3>
@@ -211,16 +226,23 @@ export default async function HomePage() {
                     className="flex flex-col justify-between border-beige-200"
                   >
                     <div>
-                      <div className="h-48 bg-charcoal-900 p-6 flex flex-col justify-between relative overflow-hidden">
-                        <div className="absolute right-0 top-0 w-36 h-36 bg-forest-600/20 rounded-full blur-2xl" />
+                      <div className="h-52 bg-charcoal-900 p-6 flex flex-col justify-between relative overflow-hidden group">
+                        <Image
+                          src="/tier-commercial-solar.jpg"
+                          alt="Net-Zero Commercial Solar Canopy System"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover object-center group-hover:scale-105 transition-transform duration-500 brightness-80"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/65 to-charcoal-950/30 z-1" />
                         <Badge
                           variant="glass"
                           size="sm"
-                          className="w-fit border-white/20 text-beige-100"
+                          className="w-fit border-white/20 text-beige-100 relative z-2"
                         >
                           Commercial & Winery
                         </Badge>
-                        <div>
+                        <div className="relative z-2">
                           <h3 className="font-heading font-extrabold text-2xl text-white">
                             Net-Zero Commercial
                           </h3>
