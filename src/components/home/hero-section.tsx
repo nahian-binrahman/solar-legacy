@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Container } from "@/components/core/container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,10 @@ import {
 } from "lucide-react";
 
 export function HeroSection() {
+  const { scrollY } = useScroll();
+  const yBg = useTransform(scrollY, [0, 800], [0, 180]);
+  const yContent = useTransform(scrollY, [0, 800], [0, 80]);
+
   const stats = [
     {
       value: "10,000+",
@@ -47,17 +51,20 @@ export function HeroSection() {
       id="home"
       className="relative w-full min-h-[100dvh] flex items-center justify-center overflow-hidden bg-forest-950 text-white"
     >
-      {/* 1. Large Solar Estate Background Image (z-0) */}
-      <div className="absolute inset-0 z-0 select-none overflow-hidden">
+      {/* 1. Large Solar Estate Background Image with Parallax Scroll (z-0) */}
+      <motion.div
+        style={{ y: yBg }}
+        className="absolute inset-[-10%] z-0 select-none overflow-hidden"
+      >
         <Image
           src="/hero-solar.jpg"
           alt="Luxury modern estate with solar panels"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center brightness-90 contrast-105"
+          className="object-cover object-center brightness-90 contrast-105 scale-105"
         />
-      </div>
+      </motion.div>
 
       {/* 2. Dark Luxury Gradient Overlays (z-1) */}
       <div className="absolute inset-0 z-1 bg-gradient-to-r from-forest-950/95 via-forest-950/85 to-forest-950/60" />
