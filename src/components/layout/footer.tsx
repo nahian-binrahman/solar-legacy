@@ -1,8 +1,8 @@
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Container } from "@/components/core/container";
 import { Badge } from "@/components/ui/badge";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { ShieldCheck, Zap, Award } from "lucide-react";
 
 export function Footer() {
@@ -12,25 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 pb-14 border-b border-white/10">
           {/* Brand Column */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-3 w-fit">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shadow-sm">
-                <Image
-                  src="/logo.webp"
-                  alt="Solar Legacy Logo"
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-heading font-extrabold text-xl tracking-tight text-white">
-                  SOLAR <span className="solar-gradient-text">LEGACY</span>
-                </span>
-                <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-beige-300 -mt-0.5">
-                  Renewable Energy Systems
-                </span>
-              </div>
-            </Link>
+            <BrandLogo size="lg" href="/" />
 
             <p className="text-sm text-beige-300 max-w-sm leading-relaxed mt-2">
               Engineering bespoke monocrystalline solar micro-grids and smart energy

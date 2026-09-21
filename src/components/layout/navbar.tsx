@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/core/container";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 
 export function Navbar() {
@@ -38,27 +38,8 @@ export function Navbar() {
     >
       <Container size="xl" padding="normal">
         <div className="flex items-center justify-between">
-          {/* Logo Area */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shadow-sm transition-transform duration-300 group-hover:scale-105">
-              <Image
-                src="/logo.webp"
-                alt="Solar Legacy Logo"
-                width={40}
-                height={40}
-                className="w-full h-full object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-heading font-extrabold text-lg sm:text-xl tracking-tight text-white flex items-center gap-1.5">
-                SOLAR <span className="solar-gradient-text">LEGACY</span>
-              </span>
-              <span className="text-[9px] tracking-[0.22em] uppercase font-semibold text-beige-300 font-sans -mt-0.5">
-                Renewable Energy Architecture
-              </span>
-            </div>
-          </Link>
+          {/* Typographic Logo Area */}
+          <BrandLogo size="md" href="/" />
 
           {/* Desktop Links */}
           <nav className="hidden lg:flex items-center gap-7">

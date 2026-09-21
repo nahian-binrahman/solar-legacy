@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Inter } from "next/font/google";
+import { Manrope, Inter, Outfit } from "next/font/google";
 import { MobileStickyCTA } from "@/components/layout/mobile-sticky-cta";
 import "./globals.css";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+  weight: ["500", "600", "700", "800", "900"],
+});
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -132,7 +139,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${inter.variable} scroll-smooth`}>
+    <html
+      lang="en"
+      className={`${outfit.variable} ${manrope.variable} ${inter.variable} scroll-smooth`}
+    >
       <head>
         <script
           type="application/ld+json"
