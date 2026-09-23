@@ -7,10 +7,10 @@ import { Container } from "@/components/core/container";
 import { Section } from "@/components/core/section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CustomEnergyPlanForm } from "@/components/service/custom-energy-plan-form";
 import {
   ShieldCheck,
   ArrowRight,
-  Coins,
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
@@ -217,34 +217,10 @@ export default function SolarOwnershipPage() {
           </Container>
         </Section>
 
-        {/* CTA */}
-        <Section background="charcoal" spacing="loose" className="relative border-t border-white/10">
-          <Container size="lg" padding="normal">
-            <div className="p-10 sm:p-14 rounded-3xl bg-gradient-to-br from-forest-900 via-forest-950 to-charcoal-900 border border-solar-400/30 text-center space-y-6 shadow-2xl relative overflow-hidden">
-              <div className="w-16 h-16 rounded-2xl bg-solar-400/10 border border-solar-400/30 flex items-center justify-center text-solar-400 mx-auto">
-                <Coins className="w-8 h-8" />
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-serif text-white font-medium">
-                Compare Ownership Options
-              </h2>
-              <p className="text-beige-200/80 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-                Receive an architectural layout of your rooftop showing exact module count, estimated 25-year kWh yield, 30% tax credit calculations, and side-by-side cash vs loan scenarios.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <Button asChild variant="solar" size="lg" className="rounded-xl px-8 font-bold text-forest-950 shadow-xl shadow-solar-400/20">
-                  <Link href="/#quote">
-                    Request Ownership Proposal
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-                <a
-                  href="tel:+18005557652"
-                  className="text-sm font-semibold tracking-wide text-beige-200 hover:text-solar-300 py-3 px-4"
-                >
-                  Direct Advisory: +1 (800) 555-7652
-                </a>
-              </div>
-            </div>
+        {/* FINAL 12-STEP LEAD FORM */}
+        <Section id="ownership-form" background="charcoal" spacing="loose" className="relative border-t border-white/10">
+          <Container size="xl" padding="normal">
+            <CustomEnergyPlanForm defaultInterest="Solar" defaultProperty="Residential" />
           </Container>
         </Section>
       </main>

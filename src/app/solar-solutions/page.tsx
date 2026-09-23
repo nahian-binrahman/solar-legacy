@@ -120,7 +120,7 @@ export default function SolarSolutionsPage() {
                 asChild
               >
                 <Link href="/#quote">
-                  <span>Build My Solar Plan</span>
+                  <span>Build My Custom Energy Plan</span>
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>

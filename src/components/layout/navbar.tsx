@@ -203,18 +203,18 @@ export function Navbar({ customLinks: _customLinks }: NavbarProps = {}) {
               </Link>
             </nav>
 
-            {/* CTA Button: Get My Solar Plan */}
+            {/* CTA Button: Build My Custom Energy Plan */}
             <div className="hidden lg:flex items-center gap-3">
               <Button
                 variant="solar"
                 size="sm"
                 className="font-bold text-forest-950 shadow-md shadow-solar-400/20 rounded-xl px-5 h-10"
                 onClick={() => {
-                  const el = document.getElementById("quote") || document.getElementById("contact");
+                  const el = document.getElementById("plan-form") || document.getElementById("quote") || document.getElementById("contact");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                <span>Get My Solar Plan</span>
+                <span>Build My Custom Energy Plan</span>
               </Button>
             </div>
 
@@ -341,12 +341,12 @@ export function Navbar({ customLinks: _customLinks }: NavbarProps = {}) {
                   className="w-full justify-center font-bold text-forest-950 h-11 rounded-xl shadow-lg shadow-solar-400/20 text-xs sm:text-sm"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    const el = document.getElementById("quote") || document.getElementById("contact");
+                    const el = document.getElementById("plan-form") || document.getElementById("quote") || document.getElementById("contact");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
                   <Sparkles className="w-4 h-4 text-forest-950" />
-                  <span>Get My Solar Plan</span>
+                  <span>Build My Custom Energy Plan</span>
                 </Button>
               </div>
             </div>

@@ -7,6 +7,7 @@ import { Container } from "@/components/core/container";
 import { Section } from "@/components/core/section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CustomEnergyPlanForm } from "@/components/service/custom-energy-plan-form";
 import {
   BatteryCharging,
   ArrowRight,
@@ -243,34 +244,10 @@ export default function BatteryBackupProgramPage() {
           </Container>
         </Section>
 
-        {/* CTA */}
-        <Section background="dark" spacing="loose" className="relative border-t border-white/10">
-          <Container size="lg" padding="normal">
-            <div className="p-10 sm:p-14 rounded-3xl bg-gradient-to-br from-forest-900 via-forest-950 to-charcoal-900 border border-solar-400/30 text-center space-y-6 shadow-2xl relative overflow-hidden">
-              <div className="w-16 h-16 rounded-2xl bg-solar-400/10 border border-solar-400/30 flex items-center justify-center text-solar-400 mx-auto">
-                <BatteryCharging className="w-8 h-8" />
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-serif text-white font-medium">
-                Find My Ideal Backup Configuration
-              </h2>
-              <p className="text-beige-200/80 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-                Tell us which appliances you need protected during a storm. We will match you with the exact kWh capacity and inverter specifications for uninterrupted resilience.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <Button asChild variant="solar" size="lg" className="rounded-xl px-8 font-bold text-forest-950 shadow-xl shadow-solar-400/20">
-                  <Link href="/#quote">
-                    Design My Backup System
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-                <a
-                  href="tel:+18005557652"
-                  className="text-sm font-semibold tracking-wide text-beige-200 hover:text-solar-300 py-3 px-4"
-                >
-                  Resilience Specialist: +1 (800) 555-7652
-                </a>
-              </div>
-            </div>
+        {/* FINAL 12-STEP LEAD FORM */}
+        <Section id="backup-form" background="dark" spacing="loose" className="relative border-t border-white/10">
+          <Container size="xl" padding="normal">
+            <CustomEnergyPlanForm defaultInterest="Battery" defaultProperty="Residential" />
           </Container>
         </Section>
       </main>
