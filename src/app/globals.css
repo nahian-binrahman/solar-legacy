@@ -226,3 +226,26 @@
   background-image: radial-gradient(rgba(245, 179, 56, 0.12) 1px, transparent 1px);
   background-size: 28px 28px;
 }
+
+/* Mobile Polish & Touch Ergonomics */
+@media (max-width: 768px) {
+  /* Prevent iOS automatic zoom on form input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Smooth touch scrolling */
+  html {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* Hide scrollbar for clean horizontal tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
