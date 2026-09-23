@@ -13,7 +13,7 @@ interface NavbarProps {
   customLinks?: NavLinkItem[];
 }
 
-export function Navbar({ customLinks: _customLinks }: NavbarProps = {}) {
+export function Navbar(_props: NavbarProps = {}) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const [isLightBg, setIsLightBg] = React.useState(false);
@@ -176,7 +176,7 @@ export function Navbar({ customLinks: _customLinks }: NavbarProps = {}) {
               </div>
 
               <Link
-                href="/#process"
+                href="/how-it-works"
                 className={`text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
                   isLightBg ? "text-charcoal-800 hover:text-solar-600" : "text-beige-100/90 hover:text-solar-300"
                 }`}
@@ -185,12 +185,12 @@ export function Navbar({ customLinks: _customLinks }: NavbarProps = {}) {
               </Link>
 
               <Link
-                href="/#about"
+                href="/why-solar-legacy"
                 className={`text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
                   isLightBg ? "text-charcoal-800 hover:text-solar-600" : "text-beige-100/90 hover:text-solar-300"
                 }`}
               >
-                Why Solar Legacy
+                Why Choose Solar Legacy
               </Link>
 
               <Link
@@ -301,7 +301,7 @@ export function Navbar({ customLinks: _customLinks }: NavbarProps = {}) {
                 </div>
 
                 <Link
-                  href="/#process"
+                  href="/how-it-works"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-base font-medium py-2 px-3 rounded-xl text-beige-100 hover:text-solar-300 hover:bg-forest-900/70"
                 >
@@ -309,11 +309,11 @@ export function Navbar({ customLinks: _customLinks }: NavbarProps = {}) {
                 </Link>
 
                 <Link
-                  href="/#about"
+                  href="/why-solar-legacy"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-base font-medium py-2 px-3 rounded-xl text-beige-100 hover:text-solar-300 hover:bg-forest-900/70"
                 >
-                  Why Solar Legacy
+                  Why Choose Solar Legacy
                 </Link>
 
                 <Link
