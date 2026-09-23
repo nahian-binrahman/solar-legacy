@@ -23,6 +23,8 @@ const badgeVariants = cva(
           "border border-border text-foreground bg-transparent",
         glass:
           "bg-white/40 dark:bg-forest-950/60 backdrop-blur-md border border-white/60 dark:border-white/10 text-foreground",
+        gold:
+          "bg-solar-400/20 text-solar-300 border border-solar-400/40 font-semibold",
       },
       size: {
         sm: "px-2.5 py-0.5 text-[11px]",

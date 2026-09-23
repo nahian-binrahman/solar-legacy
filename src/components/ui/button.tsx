@@ -24,6 +24,8 @@ const buttonVariants = cva(
           "text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors",
         charcoal:
           "bg-charcoal-900 text-white hover:bg-charcoal-800 border border-charcoal-700/50 shadow-sm",
+        outline:
+          "border border-white/20 text-white hover:bg-white/10 dark:text-white transition-colors",
         link:
           "text-forest-800 underline-offset-4 hover:underline dark:text-solar-400 p-0 h-auto font-normal",
       },
