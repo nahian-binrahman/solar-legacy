@@ -186,24 +186,19 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           </motion.div>
         </motion.div>
 
-        {/* 2. Interactive Audio Toggle Floating Control */}
+        {/* 2. Interactive Audio Toggle Floating Control (Icon Only) */}
         <div className="absolute top-20 sm:top-24 right-4 sm:right-8 z-30">
           <button
             onClick={handleSoundToggle}
             onMouseEnter={() => sounds.playHover()}
-            title={soundEnabled ? "Mute interactive audio" : "Enable luxury acoustic feedback"}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-forest-950/80 hover:bg-forest-900 border border-white/15 hover:border-solar-400/50 backdrop-blur-md text-beige-200 transition-all duration-300 text-xs shadow-lg group cursor-pointer"
+            title={soundEnabled ? "Mute audio" : "Enable audio"}
+            aria-label={soundEnabled ? "Mute audio" : "Enable audio"}
+            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-forest-950/80 hover:bg-forest-900 border border-white/15 hover:border-solar-400/50 backdrop-blur-md transition-all duration-300 shadow-lg group cursor-pointer"
           >
             {soundEnabled ? (
-              <>
-                <Volume2 className="w-3.5 h-3.5 text-solar-400 animate-pulse" />
-                <span className="text-[10px] hidden sm:inline tracking-wider font-mono text-solar-300">AUDIO ON</span>
-              </>
+              <Volume2 className="w-4 h-4 text-solar-400" />
             ) : (
-              <>
-                <VolumeX className="w-3.5 h-3.5 text-beige-400 group-hover:text-solar-400 transition-colors" />
-                <span className="text-[10px] hidden sm:inline tracking-wider font-mono text-beige-400">AUDIO</span>
-              </>
+              <VolumeX className="w-4 h-4 text-beige-400 group-hover:text-white transition-colors" />
             )}
           </button>
         </div>
