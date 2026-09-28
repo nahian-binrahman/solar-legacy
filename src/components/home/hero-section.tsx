@@ -61,6 +61,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const contentScale = useTransform(smoothProgress, [0, 0.65], [1, 0.82]);
   const contentOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0.3]);
 
+  // Mobile button transitions: initially stacked, smoothly docks beside on scroll
+  const mobBtn1X = useTransform(smoothProgress, [0, 0.4], [0, -68]);
+  const mobBtn2X = useTransform(smoothProgress, [0, 0.4], [0, 68]);
+  const mobBtn2Y = useTransform(smoothProgress, [0, 0.4], [0, -38]);
+  const mobBtnScale = useTransform(smoothProgress, [0, 0.4], [1, 0.92]);
+
   // 3. Scroll Indicator: Fades immediately on scroll
   const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
 
@@ -230,7 +236,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               )}
             </motion.h1>
 
-            {/* CTA Buttons: Set directly under the texts with micro-interactions & audio */}
+            {/* Desktop CTA Buttons: Side-by-side */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -240,12 +246,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 damping: 22,
                 delay: 0.65,
               }}
-              className="flex flex-row items-center justify-center gap-2 sm:gap-2.5 w-full max-w-sm sm:max-w-none mx-auto mt-0.5 sm:mt-1"
+              className="hidden sm:flex flex-row items-center justify-center gap-2.5 w-auto mt-1"
             >
               <Button
                 variant="solar"
                 size="default"
-                className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-8 sm:h-9 px-3.5 sm:px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 flex-1 sm:flex-initial"
+                className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-9 px-4.5 text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
                 onMouseEnter={() => sounds.playHover()}
                 onClick={() => {
                   sounds.playPrimaryClick();
@@ -260,7 +266,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               <Button
                 variant="forestOutline"
                 size="default"
-                className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-8 sm:h-9 px-3.5 sm:px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 flex-1 sm:flex-initial"
+                className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-9 px-4.5 text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
                 onMouseEnter={() => sounds.playHover()}
                 onClick={() => {
                   sounds.playSecondaryClick();
@@ -268,9 +274,62 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-solar-400 mr-1 sm:mr-1.5" />
+                <Sparkles className="w-3.5 h-3.5 text-solar-400 mr-1.5" />
                 <span>{content?.secondaryCtaText || "Explore Solutions"}</span>
               </Button>
+            </motion.div>
+
+            {/* Mobile CTA Buttons: Button 2 starts stacked DOWN below Button 1, then shifts BESIDE on scroll */}
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 240,
+                damping: 22,
+                delay: 0.65,
+              }}
+              className="sm:hidden flex flex-col items-center justify-center relative w-full max-w-[240px] mx-auto mt-0.5"
+            >
+              {/* Mobile Button 1 */}
+              <motion.div
+                style={{ x: mobBtn1X, scale: mobBtnScale }}
+                className="w-full"
+              >
+                <Button
+                  variant="solar"
+                  size="default"
+                  className="w-full font-bold text-forest-950 shadow-md shadow-solar-400/25 h-8 px-3 text-xs justify-center active:scale-95"
+                  onClick={() => {
+                    sounds.playPrimaryClick();
+                    const el = document.getElementById("quote") || document.getElementById("contact");
+                    el?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
+                  <span>{content?.primaryCtaText || "Get Solar Quote"}</span>
+                  <ArrowRight className="w-3 h-3 ml-1" />
+                </Button>
+              </motion.div>
+
+              {/* Mobile Button 2 (Initially below, animates beside on scroll) */}
+              <motion.div
+                style={{ x: mobBtn2X, y: mobBtn2Y, scale: mobBtnScale }}
+                className="w-full mt-1.5"
+              >
+                <Button
+                  variant="forestOutline"
+                  size="default"
+                  className="w-full border-white/25 text-beige-100 backdrop-blur-md h-8 px-3 text-xs justify-center active:scale-95"
+                  onClick={() => {
+                    sounds.playSecondaryClick();
+                    const el = document.getElementById("solutions");
+                    el?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
+                  <Sparkles className="w-3 h-3 text-solar-400 mr-1" />
+                  <span>{content?.secondaryCtaText || "Explore Solutions"}</span>
+                </Button>
+              </motion.div>
             </motion.div>
 
             {/* Minimalist Micro Scroll Cue: Fades upon scrolling */}

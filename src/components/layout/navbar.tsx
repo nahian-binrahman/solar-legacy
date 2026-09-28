@@ -224,13 +224,13 @@ export function Navbar(_props: NavbarProps = {}) {
 
             {/* Right Action Area: Audio Toggle + CTA + Mobile Toggle */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Audio Toggle in Navbar (Icon Only) */}
+              {/* Audio Toggle in Navbar (Desktop only - hidden on mobile) */}
               <button
                 onClick={handleSoundToggle}
                 onMouseEnter={() => sounds.playHover()}
                 title={soundEnabled ? "Mute audio" : "Enable audio"}
                 aria-label={soundEnabled ? "Mute audio" : "Enable audio"}
-                className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border transition-all duration-300 shadow-md cursor-pointer ${
+                className={`hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border transition-all duration-300 shadow-md cursor-pointer ${
                   isLightBg
                     ? "bg-white/80 hover:bg-white border-charcoal-900/15 text-charcoal-800 hover:border-solar-500"
                     : "bg-forest-900/80 hover:bg-forest-900 border-white/15 text-solar-400 hover:border-solar-400/50"
