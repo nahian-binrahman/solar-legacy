@@ -13,9 +13,12 @@ import {
   TrendingDown,
   Sparkles,
   ChevronDown,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 import { HeroContent, StatItem } from "@/types/content";
+import { sounds } from "@/lib/sound-effects";
 
 interface HeroSectionProps {
   content?: HeroContent;
@@ -24,6 +27,24 @@ interface HeroSectionProps {
 
 export function HeroSection({ content, statsData }: HeroSectionProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [soundEnabled, setSoundEnabled] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    setSoundEnabled(sounds.isEnabled());
+    const handleSoundChange = (e: CustomEvent<{ enabled: boolean }>) => {
+      setSoundEnabled(e.detail.enabled);
+    };
+    window.addEventListener("solar-sound-changed", handleSoundChange as EventListener);
+    return () => {
+      window.removeEventListener("solar-sound-changed", handleSoundChange as EventListener);
+    };
+  }, []);
+
+  const handleSoundToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newState = sounds.toggle();
+    setSoundEnabled(newState);
+  };
 
   // Dynamic interactive cursor tracking for ambient solar glow
   const mouseX = useMotionValue(0.5);
@@ -50,7 +71,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     restDelta: 0.001,
   });
 
-  // 1. Estate Scene: Apple-grade smooth zoom-out, parallax drift, and atmospheric fade
+  // 1. Estate Scene: Smooth zoom-out, parallax drift, and fade on first scroll
   const sceneScale = useTransform(smoothProgress, [0, 0.75], [1.02, 0.89]);
   const sceneY = useTransform(smoothProgress, [0, 0.75], [0, 75]);
   const sceneOpacity = useTransform(smoothProgress, [0, 0.75], [1, 0.18]);
@@ -60,7 +81,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const contentScale = useTransform(smoothProgress, [0, 0.65], [1, 0.82]);
   const contentOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0.3]);
 
-  // 3. Scroll Indicator: Fades immediately as soon as user begins scrolling
+  // 3. Scroll Indicator: Fades immediately on scroll
   const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
 
   // 4. Cards: Remain down at bottom
@@ -103,10 +124,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     : defaultStats;
 
   const [bgSrc, setBgSrc] = React.useState(content?.bgImageUrl || "/hero-solar-estate.jpg");
+  const [bgMobileSrc, setBgMobileSrc] = React.useState(content?.bgImageUrlMobile || "/hero-solar-estate-mobile.jpg");
 
   React.useEffect(() => {
     if (content?.bgImageUrl) setBgSrc(content.bgImageUrl);
-  }, [content?.bgImageUrl]);
+    if (content?.bgImageUrlMobile) setBgMobileSrc(content.bgImageUrlMobile);
+  }, [content?.bgImageUrl, content?.bgImageUrlMobile]);
 
   return (
     <div
@@ -130,31 +153,70 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full h-full"
           >
-            <Image
-              src={bgSrc}
-              alt="Next-Gen Architectural Photovoltaics Estate"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-[center_top] brightness-95 contrast-[1.02]"
-              onError={() => setBgSrc("/hero-solar-estate.jpg")}
-            />
-            {/* Atmospheric Vignette for contrast */}
-            <div className="absolute inset-0 bg-gradient-to-b from-forest-950/75 via-transparent to-forest-950/90" />
+            {/* Dedicated 9:16 Vertical Mobile Photo (< 768px) */}
+            <div className="block md:hidden relative w-full h-full">
+              <Image
+                src={bgMobileSrc}
+                alt="Next-Gen Architectural Photovoltaics Estate Mobile"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-[center_28%] brightness-95 contrast-[1.02]"
+                onError={() => setBgMobileSrc("/hero-solar-estate-mobile.jpg")}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-forest-950/75 via-transparent to-forest-950/95" />
+            </div>
+
+            {/* Desktop Landscape Photo (>= 768px) */}
+            <div className="hidden md:block relative w-full h-full">
+              <Image
+                src={bgSrc}
+                alt="Next-Gen Architectural Photovoltaics Estate"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-[center_top] brightness-95 contrast-[1.02]"
+                onError={() => setBgSrc("/hero-solar-estate.jpg")}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-forest-950/75 via-transparent to-forest-950/90" />
+            </div>
+
             {/* Subtle solar flare shimmer */}
             <div className="absolute top-[22%] left-1/2 -translate-x-1/2 w-[700px] h-[320px] bg-gradient-radial from-solar-400/12 via-solar-300/5 to-transparent blur-[120px] pointer-events-none" />
           </motion.div>
         </motion.div>
 
-        {/* 2. Foreground Content Container */}
+        {/* 2. Interactive Audio Toggle Floating Control */}
+        <div className="absolute top-20 sm:top-24 right-4 sm:right-8 z-30">
+          <button
+            onClick={handleSoundToggle}
+            onMouseEnter={() => sounds.playHover()}
+            title={soundEnabled ? "Mute interactive audio" : "Enable luxury acoustic feedback"}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-forest-950/80 hover:bg-forest-900 border border-white/15 hover:border-solar-400/50 backdrop-blur-md text-beige-200 transition-all duration-300 text-xs shadow-lg group cursor-pointer"
+          >
+            {soundEnabled ? (
+              <>
+                <Volume2 className="w-3.5 h-3.5 text-solar-400 animate-pulse" />
+                <span className="text-[10px] hidden sm:inline tracking-wider font-mono text-solar-300">AUDIO ON</span>
+              </>
+            ) : (
+              <>
+                <VolumeX className="w-3.5 h-3.5 text-beige-400 group-hover:text-solar-400 transition-colors" />
+                <span className="text-[10px] hidden sm:inline tracking-wider font-mono text-beige-400">AUDIO</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* 3. Foreground Content Container */}
         <Container size="xl" padding="normal" className="pt-16 sm:pt-20 pb-3 sm:pb-4 relative z-20 flex flex-col justify-between h-full">
           {/* Upper Stage: Open viewing window for the house */}
-          <div className="h-[38vh] sm:h-[42vh] w-full pointer-events-none" />
+          <div className="h-[34vh] sm:h-[42vh] w-full pointer-events-none" />
 
           {/* Text and buttons positioned strictly BELOW THE HOUSE */}
           <motion.div
             style={{ y: contentY, scale: contentScale, opacity: contentOpacity }}
-            className="flex flex-col items-center text-center max-w-2xl mx-auto px-4 z-20 mt-auto mb-2 sm:mb-3"
+            className="flex flex-col items-center text-center max-w-2xl mx-auto px-4 z-20 mt-auto mb-1.5 sm:mb-3"
           >
             {/* Badge: Next-Gen Architectural Photovoltaics with Solar Shimmer */}
             <motion.div
@@ -174,7 +236,11 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 dot
                 dotColor="solar"
                 pulse
-                className="border-solar-400/50 text-beige-100 px-3.5 py-1 shadow-[0_4px_20px_rgba(245,158,11,0.15)] bg-forest-950/90 backdrop-blur-md text-[11px] tracking-wide font-medium relative overflow-hidden group"
+                onClick={() => {
+                  sounds.playEnergySurge();
+                }}
+                onMouseEnter={() => sounds.playHover()}
+                className="border-solar-400/50 text-beige-100 px-3 sm:px-3.5 py-0.5 sm:py-1 shadow-[0_4px_20px_rgba(245,158,11,0.15)] bg-forest-950/90 backdrop-blur-md text-[10px] sm:text-[11px] tracking-wide font-medium relative overflow-hidden group cursor-pointer"
               >
                 <span className="relative z-10">{content?.badge || "Next-Gen Architectural Photovoltaics"}</span>
                 {/* Luminous sheen across badge */}
@@ -191,7 +257,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 ease: [0.16, 1, 0.3, 1],
                 delay: 0.55,
               }}
-              className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl tracking-tight text-white leading-tight mb-2.5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
+              className="font-heading font-extrabold text-lg xs:text-xl sm:text-2xl md:text-3xl tracking-tight text-white leading-tight mb-2 sm:mb-2.5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
             >
               {content?.title ? (
                 content.title
@@ -205,7 +271,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               )}
             </motion.h1>
 
-            {/* CTA Buttons: Set directly under the texts with micro-interactions */}
+            {/* CTA Buttons: Set directly under the texts with micro-interactions & audio */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -215,13 +281,15 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 damping: 22,
                 delay: 0.65,
               }}
-              className="flex flex-wrap items-center justify-center gap-2.5 w-full sm:w-auto mt-1"
+              className="flex flex-row items-center justify-center gap-2 sm:gap-2.5 w-full max-w-sm sm:max-w-none mx-auto mt-0.5 sm:mt-1"
             >
               <Button
                 variant="solar"
                 size="default"
-                className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-8 sm:h-9 px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
+                className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-8 sm:h-9 px-3.5 sm:px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 flex-1 sm:flex-initial"
+                onMouseEnter={() => sounds.playHover()}
                 onClick={() => {
+                  sounds.playClick();
                   const el = document.getElementById("quote") || document.getElementById("contact");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
@@ -233,13 +301,15 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               <Button
                 variant="forestOutline"
                 size="default"
-                className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-8 sm:h-9 px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
+                className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-8 sm:h-9 px-3.5 sm:px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 flex-1 sm:flex-initial"
+                onMouseEnter={() => sounds.playHover()}
                 onClick={() => {
+                  sounds.playClick();
                   const el = document.getElementById("solutions");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                <Sparkles className="w-3.5 h-3.5 text-solar-400 mr-1.5" />
+                <Sparkles className="w-3.5 h-3.5 text-solar-400 mr-1 sm:mr-1.5" />
                 <span>{content?.secondaryCtaText || "Explore Solutions"}</span>
               </Button>
             </motion.div>
@@ -247,7 +317,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             {/* Minimalist Micro Scroll Cue: Fades upon scrolling */}
             <motion.div
               style={{ opacity: scrollIndicatorOpacity }}
-              className="flex items-center gap-1.5 mt-3 text-[10px] tracking-widest uppercase text-beige-300/80 font-mono pointer-events-none"
+              className="hidden sm:flex items-center gap-1.5 mt-2.5 text-[10px] tracking-widest uppercase text-beige-300/80 font-mono pointer-events-none"
             >
               <span>Scroll to explore</span>
               <motion.div
@@ -259,10 +329,10 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             </motion.div>
           </motion.div>
 
-          {/* 3. Bottom Cards: Remain down at bottom with glass specular highlights */}
+          {/* 4. Bottom Cards: Mobile-optimized 3-column micro-grid with haptic sound */}
           <motion.div
             style={{ y: cardsY, scale: cardsScale, opacity: cardsOpacity }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 w-full mt-1"
+            className="grid grid-cols-3 gap-1.5 sm:gap-3 w-full mt-1"
           >
             {stats.map((stat, idx) => {
               const IconComponent = stat.icon;
@@ -276,25 +346,27 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                     ease: [0.16, 1, 0.3, 1],
                     delay: 0.7 + idx * 0.1,
                   }}
+                  onMouseEnter={() => sounds.playHover()}
+                  onClick={() => sounds.playHover()}
                   whileHover={{ scale: 1.02, y: -2 }}
-                  className="group relative overflow-hidden rounded-xl p-2.5 sm:p-3 bg-forest-950/85 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-xl hover:shadow-[0_8px_30px_rgba(245,158,11,0.12)]"
+                  className="group relative overflow-hidden rounded-lg sm:rounded-xl p-2 sm:p-3 bg-forest-950/85 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-xl hover:shadow-[0_8px_30px_rgba(245,158,11,0.12)] cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-forest-900/90 border border-solar-400/30 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm shrink-0">
-                        <IconComponent className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-1.5 sm:gap-2.5">
+                      <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-forest-900/90 border border-solar-400/30 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm shrink-0">
+                        <IconComponent className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-heading font-extrabold text-base sm:text-lg text-white tracking-tight group-hover:text-solar-300 transition-colors leading-tight">
+                        <span className="font-heading font-extrabold text-xs sm:text-base md:text-lg text-white tracking-tight group-hover:text-solar-300 transition-colors leading-tight">
                           {stat.value}
                         </span>
-                        <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-beige-300 font-sans">
+                        <span className="text-[8px] sm:text-[9px] md:text-[10px] font-semibold uppercase tracking-wider text-beige-300 font-sans truncate">
                           {stat.label}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-[10px] text-beige-400 mt-1 pl-9.5 font-light leading-snug line-clamp-1">
+                  <p className="hidden md:block text-[10px] text-beige-400 mt-1 pl-9.5 font-light leading-snug line-clamp-1">
                     {stat.detail}
                   </p>
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-solar-400/0 via-solar-400/50 to-solar-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
