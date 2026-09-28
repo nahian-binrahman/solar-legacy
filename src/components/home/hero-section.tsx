@@ -61,14 +61,21 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const contentScale = useTransform(smoothProgress, [0, 0.65], [1, 0.82]);
   const contentOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0.3]);
 
+  // Emergence from behind house: headline & buttons are completely HIDDEN before scroll, appear smoothly on scroll
+  const emergeOpacity = useTransform(smoothProgress, [0, 0.04, 0.22], [0, 0, 1]);
+  const emergeY = useTransform(smoothProgress, [0, 0.04, 0.22], [50, 50, 0]);
+  const emergeScale = useTransform(smoothProgress, [0, 0.04, 0.22], [0.92, 0.92, 1]);
+  const emergeFilter = useTransform(smoothProgress, [0, 0.04, 0.22], ["blur(6px)", "blur(6px)", "blur(0px)"]);
+  const emergePointerEvents = useTransform(smoothProgress, (val) => val > 0.06 ? "auto" : "none");
+
   // Mobile button transitions: zero overlap, distinct slots that dock side-by-side with clean spacing
   const mobBtnWidth = useTransform(smoothProgress, [0, 0.22, 0.4], ["100%", "48.5%", "48.5%"]);
   const mobBtn2Left = useTransform(smoothProgress, [0, 0.22, 0.4], ["0%", "51.5%", "51.5%"]);
   const mobBtn2Top = useTransform(smoothProgress, [0, 0.22, 0.4], ["42px", "42px", "0px"]);
   const mobContainerHeight = useTransform(smoothProgress, [0, 0.22, 0.4], ["78px", "78px", "36px"]);
 
-  // 3. Scroll Indicator: Fades immediately on scroll
-  const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
+  // 3. Scroll Indicator: Fades immediately when user scrolls
+  const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.06], [1, 0]);
 
   // 4. Cards: Remain down at bottom
   const cardsY = useTransform(smoothProgress, [0, 0.75], [0, 25]);
@@ -183,7 +190,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             style={{ y: contentY, scale: contentScale, opacity: contentOpacity }}
             className="flex flex-col items-center text-center max-w-2xl mx-auto px-4 z-20 mt-auto mb-1.5 sm:mb-3"
           >
-            {/* Badge: Next-Gen Architectural Photovoltaics with Solar Shimmer */}
+            {/* Badge: Next-Gen Architectural Photovoltaics - ONLY text visible before scrolling */}
             <motion.div
               initial={{ opacity: 0, scale: 0.82, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -191,9 +198,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 type: "spring",
                 stiffness: 240,
                 damping: 20,
-                delay: 0.45,
+                delay: 0.35,
               }}
-              className="mb-1"
+              className="mb-1.5"
             >
               <Badge
                 variant="glass"
@@ -205,163 +212,148 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                   sounds.playEnergySurge();
                 }}
                 onMouseEnter={() => sounds.playHover()}
-                className="border-solar-400/50 text-beige-100 px-3 sm:px-3.5 py-0.5 sm:py-1 shadow-[0_4px_20px_rgba(245,158,11,0.15)] bg-forest-950/90 backdrop-blur-md text-[10px] sm:text-[11px] tracking-wide font-medium relative overflow-hidden group cursor-pointer"
+                className="border-solar-400/50 text-beige-100 px-3.5 sm:px-4 py-1 sm:py-1.5 shadow-[0_4px_25px_rgba(245,158,11,0.22)] bg-forest-950/90 backdrop-blur-md text-[11px] sm:text-xs tracking-wide font-medium relative overflow-hidden group cursor-pointer"
               >
                 <span className="relative z-10">{content?.badge || "Next-Gen Architectural Photovoltaics"}</span>
                 {/* Luminous sheen across badge */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-solar-400/20 to-transparent" />
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-solar-400/25 to-transparent" />
               </Badge>
             </motion.div>
 
-            {/* Headline: Clean, fitted typography below the house */}
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1],
-                delay: 0.55,
-              }}
-              className="font-heading font-extrabold text-lg xs:text-xl sm:text-2xl md:text-3xl tracking-tight text-white leading-tight mb-2 sm:mb-2.5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
-            >
-              {content?.title ? (
-                content.title
-              ) : (
-                <>
-                  Power Today.{" "}
-                  <span className="solar-gradient-text block sm:inline">
-                    Build Your Legacy.
-                  </span>
-                </>
-              )}
-            </motion.h1>
-
-            {/* Desktop CTA Buttons: Side-by-side */}
+            {/* Minimalist Micro Scroll Cue: Visible before scrolling, fades immediately on scroll */}
             <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 240,
-                damping: 22,
-                delay: 0.65,
-              }}
-              className="hidden sm:flex flex-row items-center justify-center gap-2.5 w-auto mt-1"
+              style={{ opacity: scrollIndicatorOpacity }}
+              className="flex items-center gap-1.5 mt-1.5 mb-1 text-[10px] sm:text-[11px] tracking-widest uppercase text-beige-300/85 font-mono pointer-events-none"
             >
-              <Button
-                variant="solar"
-                size="default"
-                className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-9 px-4.5 text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
-                onMouseEnter={() => sounds.playHover()}
-                onClick={() => {
-                  sounds.playPrimaryClick();
-                  const el = document.getElementById("quote") || document.getElementById("contact");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
+              <span>Scroll to explore</span>
+              <motion.div
+                animate={{ y: [0, 4, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span>{content?.primaryCtaText || "Get Solar Quote"}</span>
-                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-              </Button>
-
-              <Button
-                variant="forestOutline"
-                size="default"
-                className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-9 px-4.5 text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
-                onMouseEnter={() => sounds.playHover()}
-                onClick={() => {
-                  sounds.playSecondaryClick();
-                  const el = document.getElementById("solutions");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-solar-400 mr-1.5" />
-                <span>{content?.secondaryCtaText || "Explore Solutions"}</span>
-              </Button>
+                <ChevronDown className="w-3.5 h-3.5 text-solar-400" />
+              </motion.div>
             </motion.div>
 
-            {/* Mobile CTA Buttons: Button 2 starts stacked DOWN below Button 1, then shifts cleanly BESIDE on scroll without any overlap */}
+            {/* Emerging Content on Scroll: Headline and buttons appear from behind house while scrolling */}
             <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 240,
-                damping: 22,
-                delay: 0.65,
+              style={{
+                opacity: emergeOpacity,
+                y: emergeY,
+                scale: emergeScale,
+                filter: emergeFilter,
+                pointerEvents: emergePointerEvents,
               }}
-              style={{ height: mobContainerHeight }}
-              className="sm:hidden relative w-full max-w-[310px] mx-auto mt-1 overflow-visible"
+              className="w-full flex flex-col items-center"
             >
-              {/* Mobile Button 1 (Left slot) */}
-              <motion.div
-                style={{
-                  width: mobBtnWidth,
-                  top: "0px",
-                  left: "0%",
-                  position: "absolute",
-                }}
-                className="h-9"
-              >
+              {/* Headline: Clean, fitted typography below the house */}
+              <h1 className="font-heading font-extrabold text-lg xs:text-xl sm:text-2xl md:text-3xl tracking-tight text-white leading-tight mb-2 sm:mb-2.5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+                {content?.title ? (
+                  content.title
+                ) : (
+                  <>
+                    Power Today.{" "}
+                    <span className="solar-gradient-text block sm:inline">
+                      Build Your Legacy.
+                    </span>
+                  </>
+                )}
+              </h1>
+
+              {/* Desktop CTA Buttons: Side-by-side */}
+              <div className="hidden sm:flex flex-row items-center justify-center gap-2.5 w-auto mt-1">
                 <Button
                   variant="solar"
                   size="default"
-                  className="w-full h-9 px-2 font-bold text-forest-950 shadow-md shadow-solar-400/25 text-[11px] xs:text-xs justify-center items-center active:scale-95 transition-transform rounded-xl overflow-hidden"
+                  className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-9 px-4.5 text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
+                  onMouseEnter={() => sounds.playHover()}
                   onClick={() => {
                     sounds.playPrimaryClick();
                     const el = document.getElementById("quote") || document.getElementById("contact");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <span className="truncate">
-                    {content?.primaryCtaText ? (
-                      content.primaryCtaText.length > 22
-                        ? (content.primaryCtaText.includes("Assessment") ? "Request Assessment" : "Get Solar Quote")
-                        : content.primaryCtaText
-                    ) : (
-                      "Get Solar Quote"
-                    )}
-                  </span>
-                  <ArrowRight className="w-3 h-3 ml-1 shrink-0" />
+                  <span>{content?.primaryCtaText || "Get Solar Quote"}</span>
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                 </Button>
-              </motion.div>
 
-              {/* Mobile Button 2 (Right slot: moves right then up beside Button 1) */}
-              <motion.div
-                style={{
-                  width: mobBtnWidth,
-                  left: mobBtn2Left,
-                  top: mobBtn2Top,
-                  position: "absolute",
-                }}
-                className="h-9"
-              >
                 <Button
                   variant="forestOutline"
                   size="default"
-                  className="w-full h-9 px-2 border-white/25 text-beige-100 backdrop-blur-md text-[11px] xs:text-xs justify-center items-center active:scale-95 transition-transform rounded-xl overflow-hidden"
+                  className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-9 px-4.5 text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
+                  onMouseEnter={() => sounds.playHover()}
                   onClick={() => {
                     sounds.playSecondaryClick();
                     const el = document.getElementById("solutions");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <Sparkles className="w-3 h-3 text-solar-400 mr-1 shrink-0" />
-                  <span className="truncate">{content?.secondaryCtaText || "Explore Systems"}</span>
+                  <Sparkles className="w-3.5 h-3.5 text-solar-400 mr-1.5" />
+                  <span>{content?.secondaryCtaText || "Explore Solutions"}</span>
                 </Button>
-              </motion.div>
-            </motion.div>
+              </div>
 
-            {/* Minimalist Micro Scroll Cue: Fades upon scrolling */}
-            <motion.div
-              style={{ opacity: scrollIndicatorOpacity }}
-              className="hidden sm:flex items-center gap-1.5 mt-2.5 text-[10px] tracking-widest uppercase text-beige-300/80 font-mono pointer-events-none"
-            >
-              <span>Scroll to explore</span>
+              {/* Mobile CTA Buttons: Button 2 starts stacked DOWN below Button 1, then shifts cleanly BESIDE on scroll without any overlap */}
               <motion.div
-                animate={{ y: [0, 3, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ height: mobContainerHeight }}
+                className="sm:hidden relative w-full max-w-[310px] mx-auto mt-1 overflow-visible"
               >
-                <ChevronDown className="w-3 h-3 text-solar-400" />
+                {/* Mobile Button 1 (Left slot) */}
+                <motion.div
+                  style={{
+                    width: mobBtnWidth,
+                    top: "0px",
+                    left: "0%",
+                    position: "absolute",
+                  }}
+                  className="h-9"
+                >
+                  <Button
+                    variant="solar"
+                    size="default"
+                    className="w-full h-9 px-2 font-bold text-forest-950 shadow-md shadow-solar-400/25 text-[11px] xs:text-xs justify-center items-center active:scale-95 transition-transform rounded-xl overflow-hidden"
+                    onClick={() => {
+                      sounds.playPrimaryClick();
+                      const el = document.getElementById("quote") || document.getElementById("contact");
+                      el?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                  >
+                    <span className="truncate">
+                      {content?.primaryCtaText ? (
+                        content.primaryCtaText.length > 22
+                          ? (content.primaryCtaText.includes("Assessment") ? "Request Assessment" : "Get Solar Quote")
+                          : content.primaryCtaText
+                      ) : (
+                        "Get Solar Quote"
+                      )}
+                    </span>
+                    <ArrowRight className="w-3 h-3 ml-1 shrink-0" />
+                  </Button>
+                </motion.div>
+
+                {/* Mobile Button 2 (Right slot: moves right then up beside Button 1) */}
+                <motion.div
+                  style={{
+                    width: mobBtnWidth,
+                    left: mobBtn2Left,
+                    top: mobBtn2Top,
+                    position: "absolute",
+                  }}
+                  className="h-9"
+                >
+                  <Button
+                    variant="forestOutline"
+                    size="default"
+                    className="w-full h-9 px-2 border-white/25 text-beige-100 backdrop-blur-md text-[11px] xs:text-xs justify-center items-center active:scale-95 transition-transform rounded-xl overflow-hidden"
+                    onClick={() => {
+                      sounds.playSecondaryClick();
+                      const el = document.getElementById("solutions");
+                      el?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                  >
+                    <Sparkles className="w-3 h-3 text-solar-400 mr-1 shrink-0" />
+                    <span className="truncate">{content?.secondaryCtaText || "Explore Systems"}</span>
+                  </Button>
+                </motion.div>
               </motion.div>
             </motion.div>
           </motion.div>
