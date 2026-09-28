@@ -13,8 +13,6 @@ import {
   TrendingDown,
   Sparkles,
   ChevronDown,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 
 import { HeroContent, StatItem } from "@/types/content";
@@ -27,24 +25,6 @@ interface HeroSectionProps {
 
 export function HeroSection({ content, statsData }: HeroSectionProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [soundEnabled, setSoundEnabled] = React.useState<boolean>(false);
-
-  React.useEffect(() => {
-    setSoundEnabled(sounds.isEnabled());
-    const handleSoundChange = (e: CustomEvent<{ enabled: boolean }>) => {
-      setSoundEnabled(e.detail.enabled);
-    };
-    window.addEventListener("solar-sound-changed", handleSoundChange as EventListener);
-    return () => {
-      window.removeEventListener("solar-sound-changed", handleSoundChange as EventListener);
-    };
-  }, []);
-
-  const handleSoundToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newState = sounds.toggle();
-    setSoundEnabled(newState);
-  };
 
   // Dynamic interactive cursor tracking for ambient solar glow
   const mouseX = useMotionValue(0.5);
@@ -186,22 +166,6 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           </motion.div>
         </motion.div>
 
-        {/* 2. Interactive Audio Toggle Floating Control (Icon Only) */}
-        <div className="absolute top-20 sm:top-24 right-4 sm:right-8 z-30">
-          <button
-            onClick={handleSoundToggle}
-            onMouseEnter={() => sounds.playHover()}
-            title={soundEnabled ? "Mute audio" : "Enable audio"}
-            aria-label={soundEnabled ? "Mute audio" : "Enable audio"}
-            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-forest-950/80 hover:bg-forest-900 border border-white/15 hover:border-solar-400/50 backdrop-blur-md transition-all duration-300 shadow-lg group cursor-pointer"
-          >
-            {soundEnabled ? (
-              <Volume2 className="w-4 h-4 text-solar-400" />
-            ) : (
-              <VolumeX className="w-4 h-4 text-beige-400 group-hover:text-white transition-colors" />
-            )}
-          </button>
-        </div>
 
         {/* 3. Foreground Content Container */}
         <Container size="xl" padding="normal" className="pt-16 sm:pt-20 pb-3 sm:pb-4 relative z-20 flex flex-col justify-between h-full">

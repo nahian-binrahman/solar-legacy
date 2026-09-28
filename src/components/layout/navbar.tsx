@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/core/container";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
-import { Menu, X, Phone, Sparkles, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, Sparkles, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { NavLinkItem } from "@/types/content";
+import { sounds } from "@/lib/sound-effects";
 
 interface NavbarProps {
   customLinks?: NavLinkItem[];
@@ -19,6 +20,24 @@ export function Navbar(_props: NavbarProps = {}) {
   const [isLightBg, setIsLightBg] = React.useState(false);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = React.useState<string | null>(null);
+  const [soundEnabled, setSoundEnabled] = React.useState<boolean>(true);
+
+  React.useEffect(() => {
+    setSoundEnabled(sounds.isEnabled());
+    const handleSoundChange = (e: CustomEvent<{ enabled: boolean }>) => {
+      setSoundEnabled(e.detail.enabled);
+    };
+    window.addEventListener("solar-sound-changed", handleSoundChange as EventListener);
+    return () => {
+      window.removeEventListener("solar-sound-changed", handleSoundChange as EventListener);
+    };
+  }, []);
+
+  const handleSoundToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newState = sounds.toggle();
+    setSoundEnabled(newState);
+  };
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -203,31 +222,58 @@ export function Navbar(_props: NavbarProps = {}) {
               </Link>
             </nav>
 
-            {/* CTA Button: Build My Custom Energy Plan */}
-            <div className="hidden lg:flex items-center gap-3">
-              <Button
-                variant="solar"
-                size="sm"
-                className="font-bold text-forest-950 shadow-md shadow-solar-400/20 rounded-xl px-5 h-10"
-                onClick={() => {
-                  const el = document.getElementById("plan-form") || document.getElementById("quote") || document.getElementById("contact");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
+            {/* Right Action Area: Audio Toggle + CTA + Mobile Toggle */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Audio Toggle in Navbar (Icon Only) */}
+              <button
+                onClick={handleSoundToggle}
+                onMouseEnter={() => sounds.playHover()}
+                title={soundEnabled ? "Mute audio" : "Enable audio"}
+                aria-label={soundEnabled ? "Mute audio" : "Enable audio"}
+                className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border transition-all duration-300 shadow-md cursor-pointer ${
+                  isLightBg
+                    ? "bg-white/80 hover:bg-white border-charcoal-900/15 text-charcoal-800 hover:border-solar-500"
+                    : "bg-forest-900/80 hover:bg-forest-900 border-white/15 text-solar-400 hover:border-solar-400/50"
+                }`}
               >
-                <span>Build My Custom Energy Plan</span>
-              </Button>
-            </div>
+                {soundEnabled ? (
+                  <Volume2 className="w-4 h-4 text-solar-400" />
+                ) : (
+                  <VolumeX className="w-4 h-4 text-beige-400 hover:text-white transition-colors" />
+                )}
+              </button>
 
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden p-2 rounded-lg transition-colors ${
-                isLightBg ? "text-charcoal-900 hover:bg-black/5" : "text-white hover:bg-white/10"
-              }`}
-              aria-label="Toggle Navigation Menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+              {/* Desktop CTA Button: Build My Custom Energy Plan */}
+              <div className="hidden lg:flex items-center">
+                <Button
+                  variant="solar"
+                  size="sm"
+                  className="font-bold text-forest-950 shadow-md shadow-solar-400/20 rounded-xl px-5 h-10"
+                  onClick={() => {
+                    sounds.playPrimaryClick();
+                    const el = document.getElementById("plan-form") || document.getElementById("quote") || document.getElementById("contact");
+                    el?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  onMouseEnter={() => sounds.playHover()}
+                >
+                  <span>Build My Custom Energy Plan</span>
+                </Button>
+              </div>
+
+              {/* Mobile menu toggle */}
+              <button
+                onClick={() => {
+                  sounds.playClick();
+                  setMobileMenuOpen(!mobileMenuOpen);
+                }}
+                className={`lg:hidden p-2 rounded-lg transition-colors ${
+                  isLightBg ? "text-charcoal-900 hover:bg-black/5" : "text-white hover:bg-white/10"
+                }`}
+                aria-label="Toggle Navigation Menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
 
           {/* Mobile menu dropdown */}
