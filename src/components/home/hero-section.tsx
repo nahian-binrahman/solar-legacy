@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
 import { Container } from "@/components/core/container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import {
   MapPin,
   TrendingDown,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 
 import { HeroContent, StatItem } from "@/types/content";
@@ -24,6 +25,18 @@ interface HeroSectionProps {
 export function HeroSection({ content, statsData }: HeroSectionProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
+  // Dynamic interactive cursor tracking for ambient solar glow
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+
+  const handleMouseMove = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      mouseX.set((e.clientX - rect.left) / rect.width);
+      mouseY.set((e.clientY - rect.top) / rect.height);
+    }
+  }, [mouseX, mouseY]);
+
   // Track scroll across the pinned 180vh stage
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -31,25 +44,29 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 85,
-    damping: 24,
+    stiffness: 90,
+    damping: 26,
+    mass: 0.8,
     restDelta: 0.001,
   });
 
-  // 1. Estate Scene: Zoom-out, Parallax, and Fade on first scroll
-  const sceneScale = useTransform(smoothProgress, [0, 0.75], [1.02, 0.88]);
-  const sceneY = useTransform(smoothProgress, [0, 0.75], [0, 70]);
-  const sceneOpacity = useTransform(smoothProgress, [0, 0.75], [1, 0.2]);
+  // 1. Estate Scene: Apple-grade smooth zoom-out, parallax drift, and atmospheric fade
+  const sceneScale = useTransform(smoothProgress, [0, 0.75], [1.02, 0.89]);
+  const sceneY = useTransform(smoothProgress, [0, 0.75], [0, 75]);
+  const sceneOpacity = useTransform(smoothProgress, [0, 0.75], [1, 0.18]);
 
-  // 2. Text & Buttons: Scale down a little and float upward together over the house on scroll
-  const contentY = useTransform(smoothProgress, [0, 0.65], [0, -280]);
+  // 2. Text & Buttons: Float upward across and over the house on scroll with gentle shrink
+  const contentY = useTransform(smoothProgress, [0, 0.65], [0, -290]);
   const contentScale = useTransform(smoothProgress, [0, 0.65], [1, 0.82]);
-  const contentOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0.35]);
+  const contentOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0.3]);
 
-  // 3. Cards: Remain down at bottom
-  const cardsY = useTransform(smoothProgress, [0, 0.75], [0, 30]);
+  // 3. Scroll Indicator: Fades immediately as soon as user begins scrolling
+  const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
+
+  // 4. Cards: Remain down at bottom
+  const cardsY = useTransform(smoothProgress, [0, 0.75], [0, 25]);
   const cardsScale = useTransform(smoothProgress, [0, 0.75], [1, 0.98]);
-  const cardsOpacity = useTransform(smoothProgress, [0, 0.75], [1, 0.6]);
+  const cardsOpacity = useTransform(smoothProgress, [0, 0.75], [1, 0.65]);
 
   const defaultStats = [
     {
@@ -92,19 +109,23 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   }, [content?.bgImageUrl]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-[180vh] bg-forest-950">
+    <div
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      className="relative w-full h-[180vh] bg-forest-950"
+    >
       {/* Sticky Hero Viewport: Locks the screen while animations play at first scroll */}
       <section
         id="home"
-        className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-forest-950 text-white"
+        className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-forest-950 text-white select-none"
       >
-        {/* 1. Integrated Solar House on Landscape - Shifted upward to keep house well above text */}
+        {/* 1. Integrated Solar House on Landscape */}
         <motion.div
           style={{ y: sceneY, scale: sceneScale, opacity: sceneOpacity }}
           className="absolute inset-[-5%] -top-[14%] sm:-top-[18%] h-[130%] z-0 select-none overflow-hidden pointer-events-none"
         >
           <motion.div
-            initial={{ scale: 0.88, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full h-full"
@@ -119,7 +140,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               onError={() => setBgSrc("/hero-solar-estate.jpg")}
             />
             {/* Atmospheric Vignette for contrast */}
-            <div className="absolute inset-0 bg-gradient-to-b from-forest-950/70 via-transparent to-forest-950/90" />
+            <div className="absolute inset-0 bg-gradient-to-b from-forest-950/75 via-transparent to-forest-950/90" />
+            {/* Subtle solar flare shimmer */}
+            <div className="absolute top-[22%] left-1/2 -translate-x-1/2 w-[700px] h-[320px] bg-gradient-radial from-solar-400/12 via-solar-300/5 to-transparent blur-[120px] pointer-events-none" />
           </motion.div>
         </motion.div>
 
@@ -133,9 +156,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             style={{ y: contentY, scale: contentScale, opacity: contentOpacity }}
             className="flex flex-col items-center text-center max-w-2xl mx-auto px-4 z-20 mt-auto mb-2 sm:mb-3"
           >
-            {/* Badge: Next-Gen Architectural Photovoltaics */}
+            {/* Badge: Next-Gen Architectural Photovoltaics with Solar Shimmer */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8, y: -10 }}
+              initial={{ opacity: 0, scale: 0.82, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{
                 type: "spring",
@@ -151,9 +174,11 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 dot
                 dotColor="solar"
                 pulse
-                className="border-solar-400/40 text-beige-100 px-3 py-1 shadow-lg bg-forest-950/90 backdrop-blur-md text-[11px] tracking-wide font-medium"
+                className="border-solar-400/50 text-beige-100 px-3.5 py-1 shadow-[0_4px_20px_rgba(245,158,11,0.15)] bg-forest-950/90 backdrop-blur-md text-[11px] tracking-wide font-medium relative overflow-hidden group"
               >
-                {content?.badge || "Next-Gen Architectural Photovoltaics"}
+                <span className="relative z-10">{content?.badge || "Next-Gen Architectural Photovoltaics"}</span>
+                {/* Luminous sheen across badge */}
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-solar-400/20 to-transparent" />
               </Badge>
             </motion.div>
 
@@ -166,7 +191,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 ease: [0.16, 1, 0.3, 1],
                 delay: 0.55,
               }}
-              className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl tracking-tight text-white leading-tight mb-2.5 drop-shadow-lg"
+              className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl tracking-tight text-white leading-tight mb-2.5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
             >
               {content?.title ? (
                 content.title
@@ -180,7 +205,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               )}
             </motion.h1>
 
-            {/* CTA Buttons: Set directly under the texts */}
+            {/* CTA Buttons: Set directly under the texts with micro-interactions */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -195,7 +220,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               <Button
                 variant="solar"
                 size="default"
-                className="font-bold text-forest-950 shadow-lg shadow-solar-400/25 group cursor-pointer h-8 sm:h-9 px-4 text-xs sm:text-sm justify-center hover:scale-[1.02] transition-transform active:scale-95"
+                className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-8 sm:h-9 px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
                 onClick={() => {
                   const el = document.getElementById("quote") || document.getElementById("contact");
                   el?.scrollIntoView({ behavior: "smooth" });
@@ -208,7 +233,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               <Button
                 variant="forestOutline"
                 size="default"
-                className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-8 sm:h-9 px-4 text-xs sm:text-sm justify-center hover:scale-[1.02] transition-transform active:scale-95"
+                className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-8 sm:h-9 px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95"
                 onClick={() => {
                   const el = document.getElementById("solutions");
                   el?.scrollIntoView({ behavior: "smooth" });
@@ -218,9 +243,23 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 <span>{content?.secondaryCtaText || "Explore Solutions"}</span>
               </Button>
             </motion.div>
+
+            {/* Minimalist Micro Scroll Cue: Fades upon scrolling */}
+            <motion.div
+              style={{ opacity: scrollIndicatorOpacity }}
+              className="flex items-center gap-1.5 mt-3 text-[10px] tracking-widest uppercase text-beige-300/80 font-mono pointer-events-none"
+            >
+              <span>Scroll to explore</span>
+              <motion.div
+                animate={{ y: [0, 3, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <ChevronDown className="w-3 h-3 text-solar-400" />
+              </motion.div>
+            </motion.div>
           </motion.div>
 
-          {/* 3. Bottom Cards: Remain down at bottom */}
+          {/* 3. Bottom Cards: Remain down at bottom with glass specular highlights */}
           <motion.div
             style={{ y: cardsY, scale: cardsScale, opacity: cardsOpacity }}
             className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 w-full mt-1"
@@ -238,7 +277,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                     delay: 0.7 + idx * 0.1,
                   }}
                   whileHover={{ scale: 1.02, y: -2 }}
-                  className="group relative overflow-hidden rounded-xl p-2.5 sm:p-3 bg-forest-950/85 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-xl hover:shadow-solar-400/10"
+                  className="group relative overflow-hidden rounded-xl p-2.5 sm:p-3 bg-forest-950/85 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-xl hover:shadow-[0_8px_30px_rgba(245,158,11,0.12)]"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
