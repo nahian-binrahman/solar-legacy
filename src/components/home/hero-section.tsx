@@ -289,7 +289,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 className="font-bold text-forest-950 shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.45)] group cursor-pointer h-8 sm:h-9 px-3.5 sm:px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 flex-1 sm:flex-initial"
                 onMouseEnter={() => sounds.playHover()}
                 onClick={() => {
-                  sounds.playClick();
+                  sounds.playPrimaryClick();
                   const el = document.getElementById("quote") || document.getElementById("contact");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
@@ -304,7 +304,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 className="border-white/25 text-beige-100 hover:bg-white/10 hover:text-white cursor-pointer backdrop-blur-md h-8 sm:h-9 px-3.5 sm:px-4.5 text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 flex-1 sm:flex-initial"
                 onMouseEnter={() => sounds.playHover()}
                 onClick={() => {
-                  sounds.playClick();
+                  sounds.playSecondaryClick();
                   const el = document.getElementById("solutions");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
@@ -346,8 +346,8 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                     ease: [0.16, 1, 0.3, 1],
                     delay: 0.7 + idx * 0.1,
                   }}
-                  onMouseEnter={() => sounds.playHover()}
-                  onClick={() => sounds.playHover()}
+                  onMouseEnter={() => sounds.playCardHover(idx)}
+                  onClick={() => sounds.playCardClick(idx)}
                   whileHover={{ scale: 1.02, y: -2 }}
                   className="group relative overflow-hidden rounded-lg sm:rounded-xl p-2 sm:p-3 bg-forest-950/85 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-xl hover:shadow-[0_8px_30px_rgba(245,158,11,0.12)] cursor-pointer"
                 >

@@ -3,7 +3,7 @@
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
-  private enabled: boolean = false;
+  private enabled: boolean = true;
   private ambientGain: GainNode | null = null;
   private ambientOsc: OscillatorNode | null = null;
   private isAmbientPlaying: boolean = false;
@@ -11,7 +11,17 @@ class SoundEngine {
   constructor() {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("solar_sound_enabled");
-      this.enabled = stored === "true";
+      // Default to enabled for immediate rich sensory experience
+      this.enabled = stored !== "false";
+
+      // Global one-time unlock listener for browser audio policy
+      const unlockAudio = () => {
+        this.initCtx();
+        window.removeEventListener("pointerdown", unlockAudio);
+        window.removeEventListener("keydown", unlockAudio);
+      };
+      window.addEventListener("pointerdown", unlockAudio, { passive: true });
+      window.addEventListener("keydown", unlockAudio, { passive: true });
     }
   }
 
@@ -54,7 +64,7 @@ class SoundEngine {
     }
   }
 
-  // 1. Hover Sound: Crystalline subtle glass resonance (432Hz harmonic)
+  // 1. Subtle Hover Sound: High-frequency crystalline glass resonance
   public playHover() {
     if (!this.enabled) return;
     const ctx = this.initCtx();
@@ -66,24 +76,24 @@ class SoundEngine {
       const gain = ctx.createGain();
 
       osc.type = "sine";
-      osc.frequency.setValueAtTime(880, now);
-      osc.frequency.exponentialRampToValueAtTime(1760, now + 0.05);
+      osc.frequency.setValueAtTime(1050, now);
+      osc.frequency.exponentialRampToValueAtTime(1800, now + 0.04);
 
       gain.gain.setValueAtTime(0.025, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.07);
+      osc.stop(now + 0.06);
     } catch {
       // Ignore audio interruptions
     }
   }
 
-  // 2. Click Sound: Tactile haptic metallic click
-  public playClick() {
+  // 2. Primary CTA Click: Luxury high-tech tactile snap + warm bass body (like Apple haptic)
+  public playPrimaryClick() {
     if (!this.enabled) return;
     const ctx = this.initCtx();
     if (!ctx) return;
@@ -91,30 +101,30 @@ class SoundEngine {
     try {
       const now = ctx.currentTime;
 
-      // High click transient
+      // Click transient
       const osc1 = ctx.createOscillator();
       const gain1 = ctx.createGain();
       osc1.type = "triangle";
-      osc1.frequency.setValueAtTime(420, now);
-      osc1.frequency.exponentialRampToValueAtTime(80, now + 0.06);
+      osc1.frequency.setValueAtTime(680, now);
+      osc1.frequency.exponentialRampToValueAtTime(110, now + 0.05);
 
-      gain1.gain.setValueAtTime(0.08, now);
-      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
       osc1.connect(gain1);
       gain1.connect(ctx.destination);
 
       osc1.start(now);
-      osc1.stop(now + 0.06);
+      osc1.stop(now + 0.05);
 
-      // Sub-frequency body
+      // Low frequency tactile thump
       const osc2 = ctx.createOscillator();
       const gain2 = ctx.createGain();
       osc2.type = "sine";
-      osc2.frequency.setValueAtTime(130, now);
-      osc2.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+      osc2.frequency.setValueAtTime(160, now);
+      osc2.frequency.exponentialRampToValueAtTime(45, now + 0.08);
 
-      gain2.gain.setValueAtTime(0.12, now);
+      gain2.gain.setValueAtTime(0.14, now);
       gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
       osc2.connect(gain2);
@@ -123,11 +133,104 @@ class SoundEngine {
       osc2.start(now);
       osc2.stop(now + 0.08);
     } catch {
-      // Ignore audio interruptions
+      // Ignore
     }
   }
 
-  // 3. Solar Energy Flux / Mode Switch: Cybernetic energy sweep
+  // 3. Secondary CTA Click: Holographic chime
+  public playSecondaryClick() {
+    if (!this.enabled) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const freqs = [587.33, 880, 1174.66]; // D5, A5, D6 harmonic chord
+
+      freqs.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const startTime = now + i * 0.03;
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0.04, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.35);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.36);
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
+  // 4. Card Hover Harmonic: Musical triad scaling (Card 0 = C5, Card 1 = E5, Card 2 = G5)
+  public playCardHover(index: number = 0) {
+    if (!this.enabled) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+
+    try {
+      const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 major triad
+      const freq = notes[index % notes.length];
+      const now = ctx.currentTime;
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.035, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } catch {
+      // Ignore
+    }
+  }
+
+  // 5. Card Click: Resonant glass pop
+  public playCardClick(index: number = 0) {
+    if (!this.enabled) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+
+    try {
+      const baseNotes = [261.63, 329.63, 392.0]; // C4, E4, G4 deep foundation
+      const baseFreq = baseNotes[index % baseNotes.length];
+      const now = ctx.currentTime;
+
+      // Primary pop
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(baseFreq * 2, now);
+      osc.frequency.exponentialRampToValueAtTime(baseFreq, now + 0.08);
+
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } catch {
+      // Ignore
+    }
+  }
+
+  // 6. Badge Energy Surge: Cybernetic flux sweep
   public playEnergySurge() {
     if (!this.enabled) return;
     const ctx = this.initCtx();
@@ -140,61 +243,34 @@ class SoundEngine {
       const gain = ctx.createGain();
 
       osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(120, now);
-      osc.frequency.exponentialRampToValueAtTime(480, now + 0.25);
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(560, now + 0.22);
 
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(300, now);
-      filter.frequency.exponentialRampToValueAtTime(2400, now + 0.22);
-      filter.Q.value = 4;
+      filter.frequency.setValueAtTime(400, now);
+      filter.frequency.exponentialRampToValueAtTime(2800, now + 0.2);
+      filter.Q.value = 5;
 
-      gain.gain.setValueAtTime(0.04, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.28);
+      osc.stop(now + 0.25);
     } catch {
       // Ignore
     }
   }
 
-  // 4. WebXR / Holographic Activation Chord (C Maj9 futuristic chime)
-  public playWebXREngage() {
-    if (!this.enabled) return;
-    const ctx = this.initCtx();
-    if (!ctx) return;
-
-    try {
-      const now = ctx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 987.77, 1174.66]; // C5, E5, G5, B5, D6
-
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        const startTime = now + idx * 0.04;
-
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, startTime);
-
-        gain.gain.setValueAtTime(0.04, startTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.6);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(startTime);
-        osc.stop(startTime + 0.65);
-      });
-    } catch {
-      // Ignore
-    }
+  // 7. General Click fallback
+  public playClick() {
+    this.playPrimaryClick();
   }
 
-  // 5. Activation Chime (when user enables audio)
+  // 8. Activation Chime
   public playChime() {
     const ctx = this.initCtx();
     if (!ctx) return;
@@ -225,57 +301,12 @@ class SoundEngine {
     }
   }
 
-  // 6. Ambient Solar Drone (Optional soft harmonic hum)
-  public toggleAmbient() {
-    if (!this.enabled) {
-      this.toggle();
-    }
-    if (this.isAmbientPlaying) {
-      this.stopAmbient();
-    } else {
-      this.startAmbient();
-    }
-    return this.isAmbientPlaying;
-  }
-
-  private startAmbient() {
-    const ctx = this.initCtx();
-    if (!ctx || this.isAmbientPlaying) return;
-
-    try {
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(108, now); // Solar root frequency
-
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(220, now);
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.exponentialRampToValueAtTime(0.02, now + 1.5);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      this.ambientOsc = osc;
-      this.ambientGain = gain;
-      this.isAmbientPlaying = true;
-    } catch {
-      // Ignore
-    }
-  }
-
   private stopAmbient() {
     if (!this.isAmbientPlaying || !this.ambientGain || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
       this.ambientGain.gain.setValueAtTime(this.ambientGain.gain.value, now);
-      this.ambientGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+      this.ambientGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
       setTimeout(() => {
         if (this.ambientOsc) {
           try {
@@ -287,7 +318,7 @@ class SoundEngine {
           this.ambientOsc = null;
         }
         this.isAmbientPlaying = false;
-      }, 650);
+      }, 550);
     } catch {
       this.isAmbientPlaying = false;
     }
