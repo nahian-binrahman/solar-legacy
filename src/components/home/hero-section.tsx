@@ -63,10 +63,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   // Emergence from behind house: headline & buttons are completely HIDDEN before scroll, appear smoothly on scroll
   const emergeOpacity = useTransform(smoothProgress, [0, 0.04, 0.22], [0, 0, 1]);
-  const emergeY = useTransform(smoothProgress, [0, 0.04, 0.22], [50, 50, 0]);
-  const emergeScale = useTransform(smoothProgress, [0, 0.04, 0.22], [0.92, 0.92, 1]);
-  const emergeFilter = useTransform(smoothProgress, [0, 0.04, 0.22], ["blur(6px)", "blur(6px)", "blur(0px)"]);
-  const emergePointerEvents = useTransform(smoothProgress, (val) => val > 0.06 ? "auto" : "none");
+  const emergeY = useTransform(smoothProgress, [0, 0.04, 0.22], [90, 90, 0]);
+  const emergeScale = useTransform(smoothProgress, [0, 0.04, 0.22], [0.88, 0.88, 1]);
+  const emergePointerEvents = useTransform(smoothProgress, (val) => val > 0.05 ? "auto" : "none");
 
   // Mobile button transitions: zero overlap, distinct slots that dock side-by-side with clean spacing
   const mobBtnWidth = useTransform(smoothProgress, [0, 0.22, 0.4], ["100%", "48.5%", "48.5%"]);
@@ -118,6 +117,15 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   const [bgSrc, setBgSrc] = React.useState(content?.bgImageUrl || "/hero-solar-estate.jpg");
   const [bgMobileSrc, setBgMobileSrc] = React.useState(content?.bgImageUrlMobile || "/hero-solar-estate-mobile.jpg");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   React.useEffect(() => {
     if (content?.bgImageUrl) setBgSrc(content.bgImageUrl);
@@ -182,13 +190,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
         {/* 3. Foreground Content Container */}
         <Container size="xl" padding="normal" className="pt-16 sm:pt-20 pb-3 sm:pb-4 relative z-20 flex flex-col justify-between h-full">
-          {/* Upper Stage: Open viewing window for the house */}
-          <div className="h-[34vh] sm:h-[42vh] w-full pointer-events-none" />
+          {/* Upper Stage: Viewing window positioned to align emergence directly with the house */}
+          <div className="h-[22vh] sm:h-[40vh] w-full pointer-events-none" />
 
-          {/* Text and buttons positioned strictly BELOW THE HOUSE */}
+          {/* Text and buttons emerging from behind the house */}
           <motion.div
             style={{ y: contentY, scale: contentScale, opacity: contentOpacity }}
-            className="flex flex-col items-center text-center max-w-2xl mx-auto px-4 z-20 mt-auto mb-1.5 sm:mb-3"
+            className="flex flex-col items-center text-center max-w-2xl mx-auto px-4 z-20 my-auto sm:mt-auto mb-2 sm:mb-3"
           >
             {/* Badge: Next-Gen Architectural Photovoltaics - ONLY text visible before scrolling */}
             <motion.div
@@ -240,7 +248,6 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 opacity: emergeOpacity,
                 y: emergeY,
                 scale: emergeScale,
-                filter: emergeFilter,
                 pointerEvents: emergePointerEvents,
               }}
               className="w-full flex flex-col items-center"
