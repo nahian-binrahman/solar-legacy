@@ -61,11 +61,11 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const contentScale = useTransform(smoothProgress, [0, 0.65], [1, 0.82]);
   const contentOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0.3]);
 
-  // Mobile button transitions: initially stacked, smoothly docks beside on scroll
-  const mobBtn1X = useTransform(smoothProgress, [0, 0.4], [0, -68]);
-  const mobBtn2X = useTransform(smoothProgress, [0, 0.4], [0, 68]);
-  const mobBtn2Y = useTransform(smoothProgress, [0, 0.4], [0, -38]);
-  const mobBtnScale = useTransform(smoothProgress, [0, 0.4], [1, 0.92]);
+  // Mobile button transitions: zero overlap, distinct slots that dock side-by-side with clean spacing
+  const mobBtnWidth = useTransform(smoothProgress, [0, 0.22, 0.4], ["100%", "48.5%", "48.5%"]);
+  const mobBtn2Left = useTransform(smoothProgress, [0, 0.22, 0.4], ["0%", "51.5%", "51.5%"]);
+  const mobBtn2Top = useTransform(smoothProgress, [0, 0.22, 0.4], ["42px", "42px", "0px"]);
+  const mobContainerHeight = useTransform(smoothProgress, [0, 0.22, 0.4], ["78px", "78px", "36px"]);
 
   // 3. Scroll Indicator: Fades immediately on scroll
   const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
@@ -279,7 +279,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               </Button>
             </motion.div>
 
-            {/* Mobile CTA Buttons: Button 2 starts stacked DOWN below Button 1, then shifts BESIDE on scroll */}
+            {/* Mobile CTA Buttons: Button 2 starts stacked DOWN below Button 1, then shifts cleanly BESIDE on scroll without any overlap */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -289,45 +289,64 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 damping: 22,
                 delay: 0.65,
               }}
-              className="sm:hidden flex flex-col items-center justify-center relative w-full max-w-[240px] mx-auto mt-0.5"
+              style={{ height: mobContainerHeight }}
+              className="sm:hidden relative w-full max-w-[310px] mx-auto mt-1 overflow-visible"
             >
-              {/* Mobile Button 1 */}
+              {/* Mobile Button 1 (Left slot) */}
               <motion.div
-                style={{ x: mobBtn1X, scale: mobBtnScale }}
-                className="w-full"
+                style={{
+                  width: mobBtnWidth,
+                  top: "0px",
+                  left: "0%",
+                  position: "absolute",
+                }}
+                className="h-9"
               >
                 <Button
                   variant="solar"
                   size="default"
-                  className="w-full font-bold text-forest-950 shadow-md shadow-solar-400/25 h-8 px-3 text-xs justify-center active:scale-95"
+                  className="w-full h-9 px-2 font-bold text-forest-950 shadow-md shadow-solar-400/25 text-[11px] xs:text-xs justify-center items-center active:scale-95 transition-transform rounded-xl overflow-hidden"
                   onClick={() => {
                     sounds.playPrimaryClick();
                     const el = document.getElementById("quote") || document.getElementById("contact");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <span>{content?.primaryCtaText || "Get Solar Quote"}</span>
-                  <ArrowRight className="w-3 h-3 ml-1" />
+                  <span className="truncate">
+                    {content?.primaryCtaText ? (
+                      content.primaryCtaText.length > 22
+                        ? (content.primaryCtaText.includes("Assessment") ? "Request Assessment" : "Get Solar Quote")
+                        : content.primaryCtaText
+                    ) : (
+                      "Get Solar Quote"
+                    )}
+                  </span>
+                  <ArrowRight className="w-3 h-3 ml-1 shrink-0" />
                 </Button>
               </motion.div>
 
-              {/* Mobile Button 2 (Initially below, animates beside on scroll) */}
+              {/* Mobile Button 2 (Right slot: moves right then up beside Button 1) */}
               <motion.div
-                style={{ x: mobBtn2X, y: mobBtn2Y, scale: mobBtnScale }}
-                className="w-full mt-1.5"
+                style={{
+                  width: mobBtnWidth,
+                  left: mobBtn2Left,
+                  top: mobBtn2Top,
+                  position: "absolute",
+                }}
+                className="h-9"
               >
                 <Button
                   variant="forestOutline"
                   size="default"
-                  className="w-full border-white/25 text-beige-100 backdrop-blur-md h-8 px-3 text-xs justify-center active:scale-95"
+                  className="w-full h-9 px-2 border-white/25 text-beige-100 backdrop-blur-md text-[11px] xs:text-xs justify-center items-center active:scale-95 transition-transform rounded-xl overflow-hidden"
                   onClick={() => {
                     sounds.playSecondaryClick();
                     const el = document.getElementById("solutions");
                     el?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <Sparkles className="w-3 h-3 text-solar-400 mr-1" />
-                  <span>{content?.secondaryCtaText || "Explore Solutions"}</span>
+                  <Sparkles className="w-3 h-3 text-solar-400 mr-1 shrink-0" />
+                  <span className="truncate">{content?.secondaryCtaText || "Explore Systems"}</span>
                 </Button>
               </motion.div>
             </motion.div>
