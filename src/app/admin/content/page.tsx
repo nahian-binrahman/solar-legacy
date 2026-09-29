@@ -338,6 +338,33 @@ export default function AdminContentManagerPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="text-xs font-mono uppercase text-beige-300 block mb-1">
+                  House Cutout Image URL (PNG)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={content.hero.houseImageUrl || ""}
+                    placeholder="/hero-house.png"
+                    onChange={(e) =>
+                      setContent({ ...content, hero: { ...content.hero, houseImageUrl: e.target.value } })
+                    }
+                    className="w-full bg-forest-950 border border-forest-700/60 rounded-xl px-4 py-2.5 text-sm text-beige-50 focus:border-solar-400 outline-none"
+                  />
+                  {content.hero.houseImageUrl && (
+                    <a
+                      href={content.hero.houseImageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2.5 rounded-xl bg-forest-800 text-beige-300 hover:text-solar-400"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono uppercase text-beige-300 block mb-1">

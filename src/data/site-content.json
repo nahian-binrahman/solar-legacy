@@ -13,12 +13,13 @@
     "badge": "Next-Gen Architectural Photovoltaics",
     "title": "Architectural Solar & Renewable Energy Systems",
     "subtitle": "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency.",
-    "primaryCtaText": "Request Architectural Assessment",
+    "primaryCtaText": "Get Solar Quote",
     "primaryCtaHref": "#contact",
-    "secondaryCtaText": "Explore Systems",
+    "secondaryCtaText": "Explore Solutions",
     "secondaryCtaHref": "#solutions",
-    "bgImageUrl": "/hero-solar-estate.jpg",
-    "bgImageUrlMobile": "/hero-solar-estate-mobile.jpg"
+    "bgImageUrl": "/hero-nature-bg.png",
+    "bgImageUrlMobile": "/hero-nature-bg.png",
+    "houseImageUrl": "/hero-house.png"
   },
   "stats": [
     { "id": "stat-1", "value": "15+", "label": "Years Experience", "suffix": "", "description": "Continuous innovation in renewable energy" },

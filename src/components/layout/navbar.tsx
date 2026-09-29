@@ -224,13 +224,13 @@ export function Navbar(_props: NavbarProps = {}) {
 
             {/* Right Action Area: Audio Toggle + CTA + Mobile Toggle */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Audio Toggle in Navbar (Desktop only - hidden on mobile) */}
+              {/* Audio Toggle in Navbar (Both mobile & desktop) */}
               <button
                 onClick={handleSoundToggle}
                 onMouseEnter={() => sounds.playHover()}
                 title={soundEnabled ? "Mute audio" : "Enable audio"}
                 aria-label={soundEnabled ? "Mute audio" : "Enable audio"}
-                className={`hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border transition-all duration-300 shadow-md cursor-pointer ${
+                className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border transition-all duration-300 shadow-md cursor-pointer ${
                   isLightBg
                     ? "bg-white/80 hover:bg-white border-charcoal-900/15 text-charcoal-800 hover:border-solar-500"
                     : "bg-forest-900/80 hover:bg-forest-900 border-white/15 text-solar-400 hover:border-solar-400/50"
@@ -373,6 +373,19 @@ export function Navbar(_props: NavbarProps = {}) {
 
               {/* Direct call & CTA */}
               <div className="pt-3 border-t border-white/10 flex flex-col gap-2.5">
+                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-beige-200">
+                  <span className="flex items-center gap-2">
+                    {soundEnabled ? <Volume2 className="w-4 h-4 text-solar-400" /> : <VolumeX className="w-4 h-4 text-beige-400" />}
+                    <span>Sound Effects</span>
+                  </span>
+                  <button
+                    onClick={handleSoundToggle}
+                    className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-solar-400/20 text-solar-300 border border-solar-400/30 active:scale-95 transition-transform"
+                  >
+                    {soundEnabled ? "Enabled" : "Muted"}
+                  </button>
+                </div>
+
                 <a
                   href="tel:+18005557652"
                   className="flex items-center justify-center gap-2 py-2 text-xs font-semibold tracking-wider uppercase text-solar-300 hover:text-solar-200 transition-colors"
