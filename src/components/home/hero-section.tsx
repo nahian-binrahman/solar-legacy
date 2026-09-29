@@ -10,6 +10,7 @@ import {
   Sparkles,
   MapPin,
   CheckCircle2,
+  ChevronDown,
 } from "lucide-react";
 
 import { HeroContent, StatItem } from "@/types/content";
@@ -80,6 +81,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const logoScrollY = useTransform(smoothProgress, [0, 0.20], [0, -35]);
   const logoScrollScale = useTransform(smoothProgress, [0, 0.20], [1, 0.94]);
   const logoPointerEvents = useTransform(smoothProgress, (val) => (val < 0.12 ? "auto" : "none"));
+
+  // Minimalist scroll cue visible on mobile initial load
+  const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.04], [1, 0]);
 
 
 
@@ -206,11 +210,11 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: logoScrollOpacity,
             pointerEvents: logoPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-[16%] xs:top-[18%] sm:top-[22%] md:top-[24%] z-10 flex flex-col items-center select-none w-full px-4"
+          className="absolute left-1/2 -translate-x-1/2 top-[12%] xs:top-[13%] sm:top-[13%] md:top-[13%] lg:top-[14%] z-10 flex flex-col items-center select-none w-full px-4"
         >
           {/* Inner motion div: Rises up from behind roofline over 1.05s on initial load */}
           <motion.div
-            initial={{ y: 190, opacity: 0, scale: 0.93 }}
+            initial={{ y: 220, opacity: 0, scale: 0.92 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             transition={{
               duration: 1.05,
@@ -223,19 +227,31 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             <div className="absolute inset-0 -top-6 bg-solar-400/25 blur-3xl rounded-full scale-150 pointer-events-none" />
 
             {/* Solar Legacy Logo Image - Vector sharp HD */}
-            <div className="relative w-[260px] xs:w-[320px] sm:w-[440px] md:w-[540px] lg:w-[600px] aspect-[664/169]">
+            <div className="relative w-[240px] xs:w-[280px] sm:w-[380px] md:w-[460px] lg:w-[500px] aspect-[664/169]">
               <Image
                 src="/logo-dark.png"
                 alt="Solar Legacy"
                 fill
                 priority
-                sizes="(max-width: 640px) 320px, (max-width: 1024px) 540px, 600px"
+                sizes="(max-width: 640px) 280px, (max-width: 1024px) 460px, 500px"
                 quality={100}
                 className="object-contain filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105"
               />
             </div>
 
-
+            {/* Scroll cue for mobile view only */}
+            <motion.div
+              style={{ opacity: scrollIndicatorOpacity }}
+              className="flex sm:hidden items-center gap-1.5 mt-3 text-[9px] tracking-widest uppercase text-beige-200/90 font-mono pointer-events-none bg-forest-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 shadow-lg"
+            >
+              <span>Scroll to explore</span>
+              <motion.div
+                animate={{ y: [0, 3, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <ChevronDown className="w-3 h-3 text-solar-400" />
+              </motion.div>
+            </motion.div>
           </motion.div>
         </motion.div>
 
