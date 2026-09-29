@@ -113,17 +113,20 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // 5. House Cutout Parallax & Deep Zoom-out:
-  // Mobile: Starts zoomed-in (1.75) on initial load, then zooms out (0.95) on 1st scroll to reveal 100% full house width.
+  // 5. House Cutout Parallax & Responsive Zoom:
+  // Mobile:
+  // - Phase 1 (load): Zoomed-in (1.60) grounded at bottom.
+  // - Phase 2 (1st scroll): Slightly zooms out (1.18) showing 100% full house width from garage to porch.
+  // - Phase 3 (last scroll): Remains nicely sized (1.12), only a little bit smaller (not too much zoom out) and lifted (-68px) cleanly above stat cards.
   // Desktop: Starts at 1.0 and smoothly zooms out to 0.68 -> 0.58.
   const houseScale = useTransform(smoothProgress, (p) => {
     if (isMobile) {
       if (p <= 0.26) {
         const t = p / 0.26;
-        return 1.75 - t * (1.75 - 0.95);
+        return 1.60 - t * (1.60 - 1.18);
       } else {
         const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
-        return 0.95 - t * (0.95 - 0.90);
+        return 1.18 - t * (1.18 - 1.12);
       }
     } else {
       if (p <= 0.26) {
@@ -140,9 +143,10 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.26) {
         const t = p / 0.26;
-        return 0 - t * 45;
+        return 0 - t * 35;
       } else {
-        return -45;
+        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
+        return -35 - t * 33;
       }
     } else {
       if (p <= 0.26) {
@@ -393,7 +397,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           }}
           className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center overflow-hidden"
         >
-          <div className="relative w-full h-[38vh] sm:w-full sm:h-full max-w-lg sm:max-w-none">
+          <div className="relative w-full h-[42vh] sm:w-full sm:h-full max-w-lg sm:max-w-none">
             <Image
               src={houseSrc}
               alt="Architectural Solar Residence"
