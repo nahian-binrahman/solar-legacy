@@ -101,10 +101,59 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const cardsScale = useTransform(smoothProgress, [0.38, 0.58], [0.94, 1]);
   const cardsPointerEvents = useTransform(smoothProgress, (val) => (val >= 0.45 && val <= 0.88 ? "auto" : "none"));
 
+  // Mobile detection for responsive zoom & positioning
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // 5. House Cutout Parallax & Deep Zoom-out:
-  // Zooms out noticeably (down to 0.68 on 1st scroll) to reveal wide architectural panorama
-  const houseY = useTransform(smoothProgress, [0, 0.26, 0.85], [0, 55, 95]);
-  const houseScale = useTransform(smoothProgress, [0, 0.26, 0.85], [1, 0.68, 0.58]);
+  // Mobile: Starts zoomed-in (1.75) on initial load, then zooms out (0.95) on 1st scroll to reveal 100% full house width.
+  // Desktop: Starts at 1.0 and smoothly zooms out to 0.68 -> 0.58.
+  const houseScale = useTransform(smoothProgress, (p) => {
+    if (isMobile) {
+      if (p <= 0.26) {
+        const t = p / 0.26;
+        return 1.75 - t * (1.75 - 0.95);
+      } else {
+        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
+        return 0.95 - t * (0.95 - 0.90);
+      }
+    } else {
+      if (p <= 0.26) {
+        const t = p / 0.26;
+        return 1 - t * (1 - 0.68);
+      } else {
+        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
+        return 0.68 - t * (0.68 - 0.58);
+      }
+    }
+  });
+
+  const houseY = useTransform(smoothProgress, (p) => {
+    if (isMobile) {
+      if (p <= 0.26) {
+        const t = p / 0.26;
+        return 0 - t * 45;
+      } else {
+        return -45;
+      }
+    } else {
+      if (p <= 0.26) {
+        const t = p / 0.26;
+        return 0 + t * 55;
+      } else {
+        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
+        return 55 + t * (95 - 55);
+      }
+    }
+  });
 
   const defaultStats = [
     {
@@ -340,17 +389,17 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           style={{
             y: houseY,
             scale: houseScale,
-            transformOrigin: "center 85%",
+            transformOrigin: "center 92%",
           }}
-          className="absolute inset-x-0 bottom-[14vh] sm:bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center overflow-hidden"
+          className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center overflow-hidden"
         >
-          <div className="relative w-[96vw] sm:w-full h-[32vh] sm:h-full max-w-lg sm:max-w-none">
+          <div className="relative w-full h-[38vh] sm:w-full sm:h-full max-w-lg sm:max-w-none">
             <Image
               src={houseSrc}
               alt="Architectural Solar Residence"
               fill
               priority
-              sizes="(max-width: 640px) 96vw, 100vw"
+              sizes="(max-width: 640px) 100vw, 100vw"
               quality={100}
               className="object-contain object-bottom sm:object-cover sm:object-[center_60%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
               onError={() => setHouseSrc("/hero-house.png")}
