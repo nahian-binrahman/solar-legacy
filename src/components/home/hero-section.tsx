@@ -286,7 +286,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           </div>
 
           {/* Main Headline */}
-          <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-[42px] tracking-tight text-white leading-tight mb-1.5 sm:mb-2.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
+          <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-[42px] tracking-tight text-white leading-tight mb-3.5 sm:mb-5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
             {content?.title ? (
               content.title
             ) : (
@@ -296,12 +296,6 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               </>
             )}
           </h1>
-
-          {/* Subtitle */}
-          <p className="text-[11px] xs:text-xs sm:text-sm lg:text-base text-beige-100/90 font-light leading-relaxed max-w-xs sm:max-w-2xl mb-3.5 sm:mb-5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] px-2 line-clamp-2 sm:line-clamp-none">
-            {content?.subtitle ||
-              "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency."}
-          </p>
 
           {/* CTA Buttons - Mobile and Desktop Optimized */}
           <div className="flex flex-row items-center justify-center gap-2 xs:gap-3 sm:gap-4 w-full max-w-xs sm:max-w-none px-2">
