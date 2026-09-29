@@ -115,18 +115,18 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   // 5. House Cutout Parallax & Responsive Zoom:
   // Mobile:
-  // - Phase 1 (load): Zoomed-in (1.60) grounded at bottom.
-  // - Phase 2 (1st scroll): Slightly zooms out (1.18) showing 100% full house width from garage to porch.
-  // - Phase 3 (last scroll): Remains nicely sized (1.12), only a little bit smaller (not too much zoom out) and lifted (-68px) cleanly above stat cards.
+  // - Phase 1 (load): Zoomed-in (1.88) for grand prominent architectural solar presence.
+  // - Phase 2 (1st scroll): Smoothly zooms out (1.22) revealing full house width from garage to porch.
+  // - Phase 3 (last scroll): Settles at 1.15 ("a little bit small, not too much zoom out") cleanly above stat cards.
   // Desktop: Starts at 1.0 and smoothly zooms out to 0.68 -> 0.58.
   const houseScale = useTransform(smoothProgress, (p) => {
     if (isMobile) {
       if (p <= 0.26) {
         const t = p / 0.26;
-        return 1.60 - t * (1.60 - 1.18);
+        return 1.88 - t * (1.88 - 1.22);
       } else {
         const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
-        return 1.18 - t * (1.18 - 1.12);
+        return 1.22 - t * (1.22 - 1.15);
       }
     } else {
       if (p <= 0.26) {
@@ -263,7 +263,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: logoScrollOpacity,
             pointerEvents: logoPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-[12%] xs:top-[13%] sm:top-[9.5%] md:top-[9.5%] lg:top-[10%] z-10 flex flex-col items-center select-none w-full px-4"
+          className="absolute left-1/2 -translate-x-1/2 top-[9%] xs:top-[10%] sm:top-[9.5%] md:top-[9.5%] lg:top-[10%] z-10 flex flex-col items-center select-none w-full px-4"
         >
           {/* Inner motion div: Rises up from behind roofline over 1.05s on initial load */}
           <motion.div
@@ -291,6 +291,21 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 className="object-contain filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105"
               />
             </div>
+
+            {/* Subheading revealed after load */}
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.9,
+                delay: 0.35,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="text-xs sm:text-sm text-beige-100/90 font-light text-center max-w-xs sm:max-w-md mt-2.5 sm:mt-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] leading-relaxed px-3"
+            >
+              {content?.subtitle ||
+                "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency."}
+            </motion.p>
 
             {/* Scroll cue for mobile view only */}
             <motion.div
@@ -339,7 +354,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           </div>
 
           {/* Main Headline */}
-          <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-[42px] tracking-tight text-white leading-tight mb-3.5 sm:mb-5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
+          <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-[42px] tracking-tight text-white leading-tight mb-2 sm:mb-3 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
             {content?.title ? (
               content.title
             ) : (
@@ -349,6 +364,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               </>
             )}
           </h1>
+
+          {/* Subtitle */}
+          <p className="text-[11px] xs:text-xs sm:text-sm lg:text-base text-beige-100/90 font-light leading-relaxed max-w-xs sm:max-w-2xl mb-3.5 sm:mb-5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] px-2 line-clamp-2 sm:line-clamp-none">
+            {content?.subtitle ||
+              "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency."}
+          </p>
 
           {/* CTA Buttons - Mobile and Desktop Optimized */}
           <div className="flex flex-row items-center justify-center gap-2 xs:gap-3 sm:gap-4 w-full max-w-xs sm:max-w-none px-2">
