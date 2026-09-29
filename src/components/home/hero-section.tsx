@@ -180,7 +180,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               priority
               sizes="100vw"
               quality={95}
-              className="object-cover object-[center_55%] brightness-[0.92] contrast-[1.03]"
+              className="object-cover object-[center_55%] sm:object-[center_60%] brightness-[0.92] contrast-[1.03]"
               onError={() => setBgSrc("/hero-nature-bg.png")}
             />
 
@@ -190,7 +190,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             {/* Ambient solar flare glow in sky with cursor & touch interaction */}
             <motion.div
               style={{ x: sunGlowX, y: sunGlowY, scale: sunGlowScale }}
-              className="absolute top-[14%] sm:top-[16%] left-1/2 -translate-x-1/2 w-[340px] xs:w-[480px] sm:w-[720px] h-[220px] sm:h-[340px] bg-gradient-radial from-solar-400/28 via-solar-300/12 to-transparent blur-[70px] sm:blur-[110px] pointer-events-none"
+              className="absolute top-[14%] sm:top-[14%] left-1/2 -translate-x-1/2 w-[340px] xs:w-[480px] sm:w-[720px] h-[220px] sm:h-[340px] bg-gradient-radial from-solar-400/28 via-solar-300/12 to-transparent blur-[70px] sm:blur-[110px] pointer-events-none"
             />
 
             {/* Bottom vignette to blend into ground and bottom cards */}
@@ -210,7 +210,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: logoScrollOpacity,
             pointerEvents: logoPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-[12%] xs:top-[13%] sm:top-[13%] md:top-[13%] lg:top-[14%] z-10 flex flex-col items-center select-none w-full px-4"
+          className="absolute left-1/2 -translate-x-1/2 top-[12%] xs:top-[13%] sm:top-[9.5%] md:top-[9.5%] lg:top-[10%] z-10 flex flex-col items-center select-none w-full px-4"
         >
           {/* Inner motion div: Rises up from behind roofline over 1.05s on initial load */}
           <motion.div
@@ -227,13 +227,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             <div className="absolute inset-0 -top-6 bg-solar-400/25 blur-3xl rounded-full scale-150 pointer-events-none" />
 
             {/* Solar Legacy Logo Image - Vector sharp HD */}
-            <div className="relative w-[240px] xs:w-[280px] sm:w-[380px] md:w-[460px] lg:w-[500px] aspect-[664/169]">
+            <div className="relative w-[240px] xs:w-[280px] sm:w-[360px] md:w-[440px] lg:w-[480px] aspect-[664/169]">
               <Image
                 src="/logo-dark.png"
                 alt="Solar Legacy"
                 fill
                 priority
-                sizes="(max-width: 640px) 280px, (max-width: 1024px) 460px, 500px"
+                sizes="(max-width: 640px) 280px, (max-width: 1024px) 440px, 480px"
                 quality={100}
                 className="object-contain filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105"
               />
@@ -359,7 +359,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               priority
               sizes="100vw"
               quality={100}
-              className="object-cover object-[center_55%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
+              className="object-cover object-[center_55%] sm:object-[center_60%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
               onError={() => setHouseSrc("/hero-house.png")}
             />
           </div>
