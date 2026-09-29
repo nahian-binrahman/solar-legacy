@@ -101,10 +101,10 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const cardsScale = useTransform(smoothProgress, [0.38, 0.58], [0.94, 1]);
   const cardsPointerEvents = useTransform(smoothProgress, (val) => (val >= 0.45 && val <= 0.88 ? "auto" : "none"));
 
-  // 5. House Cutout Parallax & Zoom-out:
-  // Zooms out and recedes smoothly on 1st scroll to open up wide stage
-  const houseY = useTransform(smoothProgress, [0, 0.28, 0.85], [0, 45, 80]);
-  const houseScale = useTransform(smoothProgress, [0, 0.28, 0.85], [1, 0.84, 0.78]);
+  // 5. House Cutout Parallax & Deep Zoom-out:
+  // Zooms out noticeably (down to 0.68 on 1st scroll) to reveal wide architectural panorama
+  const houseY = useTransform(smoothProgress, [0, 0.26, 0.85], [0, 55, 95]);
+  const houseScale = useTransform(smoothProgress, [0, 0.26, 0.85], [1, 0.68, 0.58]);
 
   const defaultStats = [
     {
