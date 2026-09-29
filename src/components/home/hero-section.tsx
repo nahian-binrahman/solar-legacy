@@ -333,10 +333,8 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
         {/* =========================================================================
             LAYER 3 (Z-20): HOUSE CUTOUT (Foreground Parallax Plane)
-            Opaque house PNG with solar panels.
-            Uses exact same coordinate space and object-cover alignment as Layer 1,
-            guaranteeing 100% pixel-perfect alignment and scale on BOTH mobile & desktop!
-            Logo and headline sit behind its roofline (Z-10), while cards sit in front (Z-30).
+            Mobile: object-contain object-bottom so the FULL HOUSE WIDTH (garage to entrance) is 100% visible without clipping.
+            Desktop: object-cover sm:object-[center_60%] for seamless widescreen landscape alignment.
            ========================================================================= */}
         <motion.div
           style={{
@@ -344,17 +342,17 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             scale: houseScale,
             transformOrigin: "center 85%",
           }}
-          className="absolute inset-[-4%] w-[108%] h-[108%] z-20 pointer-events-none select-none overflow-hidden"
+          className="absolute inset-x-0 bottom-[14vh] sm:bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center overflow-hidden"
         >
-          <div className="relative w-full h-full">
+          <div className="relative w-[96vw] sm:w-full h-[32vh] sm:h-full max-w-lg sm:max-w-none">
             <Image
               src={houseSrc}
               alt="Architectural Solar Residence"
               fill
               priority
-              sizes="100vw"
+              sizes="(max-width: 640px) 96vw, 100vw"
               quality={100}
-              className="object-cover object-[center_55%] sm:object-[center_60%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
+              className="object-contain object-bottom sm:object-cover sm:object-[center_60%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
               onError={() => setHouseSrc("/hero-house.png")}
             />
           </div>
@@ -362,7 +360,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
         {/* =========================================================================
             LAYER 4 (Z-30): PHASE 3 - 3 STAT CARDS (REVEALS ON 2ND SCROLL)
-            Slides up and reveals in front of the lower house base.
+            Positioned above the mobile bottom CTA bar with high-contrast opaque frosted glass.
            ========================================================================= */}
         <motion.div
           style={{
@@ -371,9 +369,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: cardsOpacity,
             pointerEvents: cardsPointerEvents,
           }}
-          className="absolute bottom-3 xs:bottom-4 sm:bottom-6 md:bottom-8 inset-x-0 z-30 px-2.5 xs:px-3 sm:px-6 max-w-5xl mx-auto w-full"
+          className="absolute bottom-[92px] sm:bottom-6 md:bottom-8 inset-x-0 z-30 px-3 sm:px-6 max-w-5xl mx-auto w-full"
         >
-          <div className="grid grid-cols-3 gap-1.5 xs:gap-2 sm:gap-3 md:gap-4 w-full">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 w-full">
             {stats.map((stat, idx) => {
               const IconComponent = stat.icon;
               return (
@@ -383,17 +381,17 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                   whileTap={{ scale: 0.97 }}
                   onMouseEnter={() => sounds.playCardHover(idx)}
                   onClick={() => sounds.playCardClick(idx)}
-                  className="group relative overflow-hidden rounded-xl p-2 xs:p-2.5 sm:p-3.5 md:p-4 bg-[#081510]/90 backdrop-blur-xl border border-white/15 hover:border-solar-400/60 transition-all duration-300 shadow-[0_12px_40px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_45px_rgba(245,158,11,0.2)] cursor-pointer"
+                  className="group relative overflow-hidden rounded-xl p-2.5 sm:p-3.5 md:p-4 bg-[#05130d] border border-solar-400/40 transition-all duration-300 shadow-[0_16px_45px_rgba(0,0,0,0.95)] hover:border-solar-400/80 cursor-pointer"
                 >
                   <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
-                    <div className="flex items-center justify-center w-6 h-6 xs:w-7 xs:h-7 sm:w-9 sm:h-9 rounded-lg bg-forest-900/90 border border-solar-400/30 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm shrink-0">
-                      <IconComponent className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
+                    <div className="flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-forest-900 border border-solar-400/40 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm shrink-0">
+                      <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                     <div className="flex flex-col min-w-0 w-full">
-                      <span className="font-heading font-extrabold text-xs xs:text-sm sm:text-xl md:text-2xl text-white tracking-tight group-hover:text-solar-300 transition-colors leading-tight truncate">
+                      <span className="font-heading font-extrabold text-sm sm:text-xl md:text-2xl text-white tracking-tight group-hover:text-solar-300 transition-colors leading-tight truncate">
                         {stat.value}
                       </span>
-                      <span className="text-[7.5px] xs:text-[8px] sm:text-[9px] md:text-[11px] font-bold uppercase tracking-wider text-solar-400/90 font-mono truncate leading-tight mt-0.5">
+                      <span className="text-[7.5px] xs:text-[8.5px] sm:text-[9px] md:text-[11px] font-bold uppercase tracking-wider text-solar-400 font-mono truncate leading-tight mt-0.5">
                         {stat.label}
                       </span>
                     </div>
