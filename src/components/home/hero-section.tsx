@@ -152,13 +152,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 2.15 - t * (2.15 - 1.28);
+        return 1.75 - t * (1.75 - 1.28);
       }
       return 1.28; // Freezed still picture (a little bit more wider)
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.20 - t * (1.20 - 0.73);
+        return 1.0 - t * (1.0 - 0.73);
       }
       return 0.73; // Freezed still picture (a little bit more wider)
     }
@@ -168,13 +168,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 2.15 - t * (2.15 - 1.20);
+        return 1.70 - t * (1.70 - 1.20);
       }
       return 1.20;
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.18 - t * (1.18 - 0.65);
+        return 0.92 - t * (0.92 - 0.65);
       }
       return 0.65;
     }
@@ -184,13 +184,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 25 - t * 41;
+        return 35 - t * (35 - -16);
       }
       return -16; // Freezed still picture
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 35 - t * (35 - 20);
+        return 48 - t * (48 - 20);
       }
       return 20; // Freezed still picture
     }
@@ -300,12 +300,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: logoScrollOpacity,
             pointerEvents: logoPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-5 xs:top-6 sm:top-7 md:top-8 lg:top-9 z-10 flex flex-col items-center select-none w-full px-4"
+          className="absolute left-1/2 -translate-x-1/2 top-[2px] xs:top-[4px] sm:top-[6px] md:top-[8px] z-10 flex flex-col items-center select-none w-full px-4"
         >
           {/* Inner motion div: Rises up from behind roofline over 1.05s on initial load */}
           <motion.div
             initial={{ y: 220, opacity: 0, scale: 0.92 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
+            animate={{ y: -22, opacity: 1, scale: 1 }}
             transition={{
               duration: 1.05,
               ease: [0.16, 1, 0.3, 1],
@@ -314,12 +314,12 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             className="relative flex flex-col items-center"
           >
             {/* Ambient golden sun radiance behind logo */}
-            <div className="absolute inset-0 -top-6 bg-solar-400/25 blur-3xl rounded-full scale-150 pointer-events-none" />
+            <div className="absolute inset-0 -top-8 bg-solar-400/28 blur-3xl rounded-full scale-150 pointer-events-none" />
 
             {/* Solar Legacy Logo with outer drop-shadow to prevent rectangular clipping */}
             <div className="relative filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105">
               <div
-                className="relative w-[310px] xs:w-[370px] sm:w-[480px] md:w-[580px] lg:w-[640px] aspect-[664/169]"
+                className="relative w-[290px] xs:w-[340px] sm:w-[440px] md:w-[520px] lg:w-[570px] aspect-[664/169]"
                 style={{
                   WebkitMaskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
                   maskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
@@ -330,7 +330,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                   alt="Solar Legacy"
                   fill
                   priority
-                  sizes="(max-width: 640px) 370px, (max-width: 1024px) 580px, 640px"
+                  sizes="(max-width: 640px) 340px, (max-width: 1024px) 520px, 570px"
                   quality={100}
                   className="object-contain"
                 />
