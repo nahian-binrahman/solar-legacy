@@ -321,8 +321,8 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               <div
                 className="relative w-[340px] xs:w-[420px] sm:w-[540px] md:w-[640px] lg:w-[700px] aspect-[664/169]"
                 style={{
-                  WebkitMaskImage: "linear-gradient(140deg, #000 0%, #000 52%, rgba(0,0,0,0.75) 65%, rgba(0,0,0,0.38) 82%, rgba(0,0,0,0.15) 96%, rgba(0,0,0,0.06) 100%)",
-                  maskImage: "linear-gradient(140deg, #000 0%, #000 52%, rgba(0,0,0,0.75) 65%, rgba(0,0,0,0.38) 82%, rgba(0,0,0,0.15) 96%, rgba(0,0,0,0.06) 100%)",
+                  WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 52%, transparent 52%), linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 75%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.06) 100%)",
+                  maskImage: "linear-gradient(to right, #000 0%, #000 52%, transparent 52%), linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 75%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.06) 100%)",
                 }}
               >
                 <Image
