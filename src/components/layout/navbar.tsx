@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/core/container";
 import { BrandLogo } from "@/components/ui/brand-logo";
-import { ScrollProgress } from "@/components/layout/scroll-progress";
-import { Menu, X, Phone, Sparkles, ChevronDown, Volume2, VolumeX } from "lucide-react";
+import { Menu, X, Phone, Sparkles, ChevronDown } from "lucide-react";
 import { NavLinkItem } from "@/types/content";
 import { sounds } from "@/lib/sound-effects";
 
@@ -20,24 +19,6 @@ export function Navbar(_props: NavbarProps = {}) {
   const [isLightBg, setIsLightBg] = React.useState(false);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = React.useState<string | null>(null);
-  const [soundEnabled, setSoundEnabled] = React.useState<boolean>(true);
-
-  React.useEffect(() => {
-    setSoundEnabled(sounds.isEnabled());
-    const handleSoundChange = (e: CustomEvent<{ enabled: boolean }>) => {
-      setSoundEnabled(e.detail.enabled);
-    };
-    window.addEventListener("solar-sound-changed", handleSoundChange as EventListener);
-    return () => {
-      window.removeEventListener("solar-sound-changed", handleSoundChange as EventListener);
-    };
-  }, []);
-
-  const handleSoundToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newState = sounds.toggle();
-    setSoundEnabled(newState);
-  };
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -230,24 +211,6 @@ export function Navbar(_props: NavbarProps = {}) {
 
             {/* Right Action Area: Audio Toggle + CTA + Mobile Toggle */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Audio Toggle in Navbar (Desktop only) */}
-              <button
-                onClick={handleSoundToggle}
-                onMouseEnter={() => sounds.playHover()}
-                title={soundEnabled ? "Mute audio" : "Enable audio"}
-                aria-label={soundEnabled ? "Mute audio" : "Enable audio"}
-                className={`hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border transition-all duration-300 shadow-md cursor-pointer ${
-                  isLightBg
-                    ? "bg-white/80 hover:bg-white border-charcoal-900/15 text-charcoal-800 hover:border-solar-500"
-                    : "bg-forest-900/80 hover:bg-forest-900 border-white/15 text-solar-400 hover:border-solar-400/50"
-                }`}
-              >
-                {soundEnabled ? (
-                  <Volume2 className="w-4 h-4 text-solar-400" />
-                ) : (
-                  <VolumeX className="w-4 h-4 text-beige-400 hover:text-white transition-colors" />
-                )}
-              </button>
 
               {/* Desktop CTA Button: Build My Custom Energy Plan */}
               <div className="hidden lg:flex items-center">
