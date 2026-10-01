@@ -152,13 +152,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.85 - t * (1.85 - 1.28);
+        return 2.05 - t * (2.05 - 1.28);
       }
       return 1.28; // Freezed still picture (a little bit more wider)
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.18 - t * (1.18 - 0.73);
+        return 1.28 - t * (1.28 - 0.73);
       }
       return 0.73; // Freezed still picture (a little bit more wider)
     }
@@ -168,13 +168,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.75 - t * (1.75 - 1.20);
+        return 1.95 - t * (1.95 - 1.20);
       }
       return 1.20;
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.06 - t * (1.06 - 0.65);
+        return 1.15 - t * (1.15 - 0.65);
       }
       return 0.65;
     }
@@ -184,13 +184,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 14 - t * (14 - -16);
+        return 20 - t * (20 - -16);
       }
       return -16; // Freezed still picture
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 34 - t * (34 - 20);
+        return 42 - t * (42 - 20);
       }
       return 20; // Freezed still picture
     }
@@ -300,7 +300,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: logoScrollOpacity,
             pointerEvents: logoPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-[6px] xs:top-[8px] sm:top-[10px] md:top-[12px] z-10 flex flex-col items-center select-none w-full px-4"
+          className="absolute left-1/2 -translate-x-1/2 -top-2 xs:-top-1.5 sm:-top-1 md:-top-0.5 lg:top-0 z-10 flex flex-col items-center select-none w-full px-4"
         >
           {/* Inner motion div: Rises up from behind roofline over 1.05s on initial load */}
           <motion.div
@@ -483,8 +483,8 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           <div
             className="relative w-full h-[42vh] sm:w-full sm:h-full max-w-lg sm:max-w-none"
             style={{
-              WebkitMaskImage: "linear-gradient(to bottom, #000 70%, rgba(0,0,0,0.92) 78%, rgba(0,0,0,0.55) 86%, rgba(0,0,0,0.18) 94%, transparent 100%)",
-              maskImage: "linear-gradient(to bottom, #000 70%, rgba(0,0,0,0.92) 78%, rgba(0,0,0,0.55) 86%, rgba(0,0,0,0.18) 94%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, #000 85%, rgba(0,0,0,0.92) 92%, rgba(0,0,0,0.4) 97%, transparent 100%)",
+              maskImage: "linear-gradient(to bottom, #000 85%, rgba(0,0,0,0.92) 92%, rgba(0,0,0,0.4) 97%, transparent 100%)",
             }}
           >
             <Image
@@ -497,39 +497,22 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               className="object-contain object-bottom sm:object-cover sm:object-[center_60%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
               onError={() => setHouseSrc("/hero-house.png")}
             />
-
-            {/* Dark foundation contact shade cast specifically onto the house floor baseline */}
-            <div
-              className="absolute inset-x-0 bottom-0 h-16 sm:h-24 pointer-events-none"
-              style={{
-                background: "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(1, 6, 4, 0.40) 45%, rgba(1, 6, 4, 0.90) 85%, #010604 100%)",
-              }}
-            />
           </div>
         </motion.div>
 
         {/* =========================================================================
-            LAYER 3B (Z-25): FLOOR GROUND DARK SHADE & AMBIENT CONTACT SHADOW
-            Anchors the house floor tightly into the terrain along the foundation line,
-            leaving walls and windows clear while eliminating any floating appearance.
+            LAYER 3B (Z-15): GROUND TERRAIN CONTACT SHADE (UNDER THE HOUSE)
+            Placed at z-[15] beneath the z-[20] house cutout:
+            Darkens the grass ground and terrain underneath the foundation so the house sits
+            naturally into the background, while the house walls remain 100% bright, crisp, and shade-free!
            ========================================================================= */}
         <div
-          className="absolute inset-x-0 bottom-0 h-24 sm:h-32 md:h-36 z-25 pointer-events-none select-none"
+          className="absolute inset-x-0 bottom-0 h-32 sm:h-44 md:h-52 z-[15] pointer-events-none select-none"
         >
-          {/* Ambient dark ground shade right along the floor baseline */}
           <div
             className="w-full h-full"
             style={{
-              background: "linear-gradient(to bottom, rgba(1, 6, 4, 0) 0%, rgba(1, 6, 4, 0.45) 45%, rgba(1, 6, 4, 0.85) 75%, #010604 100%)",
-            }}
-          />
-
-          {/* Concentrated contact shadow line under the floor foundation */}
-          <div
-            className="absolute inset-x-0 bottom-2 sm:bottom-4 md:bottom-6 h-12 sm:h-16 opacity-90"
-            style={{
-              background: "radial-gradient(ellipse 90% 70% at 50% 50%, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.55) 60%, transparent 88%)",
-              filter: "blur(8px)",
+              background: "linear-gradient(to bottom, rgba(1, 6, 4, 0) 0%, rgba(1, 6, 4, 0.40) 35%, rgba(1, 6, 4, 0.85) 75%, #010604 100%)",
             }}
           />
         </div>
