@@ -60,13 +60,40 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     restDelta: 0.001,
   });
 
+  // Mobile and responsive dimensions detection
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [spreadDistance, setSpreadDistance] = React.useState(60);
+
+  React.useEffect(() => {
+    const checkDimensions = () => {
+      const w = window.innerWidth;
+      setIsMobile(w < 640);
+      if (w < 640) {
+        setSpreadDistance(14);
+      } else if (w < 1024) {
+        setSpreadDistance(38);
+      } else {
+        setSpreadDistance(65);
+      }
+    };
+    checkDimensions();
+    window.addEventListener("resize", checkDimensions);
+    return () => window.removeEventListener("resize", checkDimensions);
+  }, []);
+
   // =========================================================================
   // PARALLAX & ANIMATION TRANSFORMS
   // =========================================================================
 
-  // 1. Background Nature Parallax: moves subtly on 1st scroll, then freezes like a still picture
+  // 1. Background Nature Parallax: deeply zoomed in on initial load (1.35 desktop / 1.45 mobile), then settles smoothly (1.06)
   const bgY = useTransform(smoothProgress, (p) => (p <= 0.20 ? (p / 0.20) * 20 : 20));
-  const bgScale = useTransform(smoothProgress, (p) => (p <= 0.20 ? 1.02 + (p / 0.20) * 0.04 : 1.06));
+  const bgScale = useTransform(smoothProgress, (p) => {
+    const initialScale = isMobile ? 1.45 : 1.35;
+    if (p <= 0.20) {
+      return initialScale - (p / 0.20) * (initialScale - 1.06);
+    }
+    return 1.06;
+  });
   const bgOpacity = useTransform(smoothProgress, [0, 0.85, 1], [1, 0.95, 0.35]);
 
   // Sun flare parallax, dynamic radiance, and cursor/touch drift
@@ -100,9 +127,6 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const cardsScale = useTransform(smoothProgress, (p) => (p <= 0.20 ? 0.95 + (p / 0.20) * 0.05 : 1));
   const cardsPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.08 ? "auto" : "none"));
 
-  // Responsive max gap spread distance for left and right cards
-  const [spreadDistance, setSpreadDistance] = React.useState(60);
-
   // Side gap between 3 cards increases during 3rd scroll (0.50 -> 0.95)
   // as the screen reaches the end of the hero container and scrolls down
   const cardSpread = useTransform(smoothProgress, (p) => {
@@ -121,27 +145,6 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   // Side dark vignettes beside the wall: reveals with 1st scroll into the settled scene
   const sideVignetteOpacity = useTransform(smoothProgress, (p) => (p < 0.04 ? 0 : Math.min(1, (p - 0.04) / 0.14)));
-
-  // Mobile detection for responsive zoom & positioning
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkDimensions = () => {
-      const w = window.innerWidth;
-      setIsMobile(w < 640);
-      if (w < 640) {
-        setSpreadDistance(14);
-      } else if (w < 1024) {
-        setSpreadDistance(38);
-      } else {
-        setSpreadDistance(65);
-      }
-    };
-    checkDimensions();
-    window.addEventListener("resize", checkDimensions);
-    return () => window.removeEventListener("resize", checkDimensions);
-  }, []);
-
   // 5. House Cutout Parallax & Responsive Zoom:
   // After 1st scroll (p > 0.20), the scene is frozen like a still picture!
   // houseScaleX expands horizontally for a majestic wide architectural estate presence.
@@ -149,13 +152,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.85 - t * (1.85 - 1.28);
+        return 2.15 - t * (2.15 - 1.28);
       }
       return 1.28; // Freezed still picture (a little bit more wider)
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1 - t * (1 - 0.73);
+        return 1.20 - t * (1.20 - 0.73);
       }
       return 0.73; // Freezed still picture (a little bit more wider)
     }
@@ -165,13 +168,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.85 - t * (1.85 - 1.20);
+        return 2.15 - t * (2.15 - 1.20);
       }
       return 1.20;
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1 - t * (1 - 0.65);
+        return 1.18 - t * (1.18 - 0.65);
       }
       return 0.65;
     }
@@ -316,7 +319,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             {/* Solar Legacy Logo with outer drop-shadow to prevent rectangular clipping */}
             <div className="relative filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105">
               <div
-                className="relative w-[240px] xs:w-[280px] sm:w-[360px] md:w-[440px] lg:w-[480px] aspect-[664/169]"
+                className="relative w-[310px] xs:w-[370px] sm:w-[480px] md:w-[580px] lg:w-[640px] aspect-[664/169]"
                 style={{
                   WebkitMaskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
                   maskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
@@ -327,7 +330,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                   alt="Solar Legacy"
                   fill
                   priority
-                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 440px, 480px"
+                  sizes="(max-width: 640px) 370px, (max-width: 1024px) 580px, 640px"
                   quality={100}
                   className="object-contain"
                 />
