@@ -477,7 +477,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           }}
           className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center overflow-hidden"
         >
-          <div className="relative w-full h-[42vh] sm:w-full sm:h-full max-w-lg sm:max-w-none">
+          <div
+            className="relative w-full h-[42vh] sm:w-full sm:h-full max-w-lg sm:max-w-none"
+            style={{
+              WebkitMaskImage: "linear-gradient(to bottom, #000 80%, rgba(0,0,0,0.85) 86%, rgba(0,0,0,0.3) 94%, transparent 100%)",
+              maskImage: "linear-gradient(to bottom, #000 80%, rgba(0,0,0,0.85) 86%, rgba(0,0,0,0.3) 94%, transparent 100%)",
+            }}
+          >
             <Image
               src={houseSrc}
               alt="Architectural Solar Residence"
@@ -489,6 +495,23 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               onError={() => setHouseSrc("/hero-house.png")}
             />
           </div>
+        </motion.div>
+
+        {/* =========================================================================
+            LAYER 3B (Z-22): FLOOR BLEND OVERLAY
+            Smoothly fades the bottom of the house walls/floor into the dark background,
+            eliminating any hard edges or separation from the ground.
+           ========================================================================= */}
+        <motion.div
+          style={{ opacity: sideVignetteOpacity }}
+          className="absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[22] pointer-events-none select-none"
+        >
+          <div
+            className="w-full h-full"
+            style={{
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.45) 45%, rgba(2, 8, 5, 0.88) 78%, #020805 100%)",
+            }}
+          />
         </motion.div>
 
         {/* =========================================================================
