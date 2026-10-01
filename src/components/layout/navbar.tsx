@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/core/container";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { Menu, X, Phone, Sparkles, ChevronDown } from "lucide-react";
 import { NavLinkItem } from "@/types/content";
 import { sounds } from "@/lib/sound-effects";
