@@ -501,21 +501,20 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         </motion.div>
 
         {/* =========================================================================
-            LAYER 3B (Z-22): FLOOR BLEND OVERLAY
-            Smoothly fades the bottom of the house walls/floor into the dark background,
-            eliminating any hard edges or separation from the ground.
+            LAYER 3B (Z-22): FLOOR GROUND SHADE & AMBIENT CONTACT SHADOW
+            Smoothly anchors the bottom foundation/floor of the house into the terrain,
+            eliminating any hard edges or floating/detached appearance from the bg.
            ========================================================================= */}
-        <motion.div
-          style={{ opacity: sideVignetteOpacity }}
-          className="absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[22] pointer-events-none select-none"
+        <div
+          className="absolute inset-x-0 bottom-0 h-32 sm:h-44 md:h-56 z-[22] pointer-events-none select-none"
         >
           <div
             className="w-full h-full"
             style={{
-              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.45) 45%, rgba(2, 8, 5, 0.88) 78%, #020805 100%)",
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.18) 30%, rgba(2, 8, 5, 0.55) 60%, rgba(2, 8, 5, 0.90) 85%, #020805 100%)",
             }}
           />
-        </motion.div>
+        </div>
 
         {/* =========================================================================
             LAYER 4 (Z-30): 3 STAT CARDS (HEAD STARTS A LITTLE UPPER TO HOUSE FLOOR)
