@@ -152,13 +152,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.65 - t * (1.65 - 1.28);
+        return 1.85 - t * (1.85 - 1.28);
       }
       return 1.28; // Freezed still picture (a little bit more wider)
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.05 - t * (1.05 - 0.73);
+        return 1.18 - t * (1.18 - 0.73);
       }
       return 0.73; // Freezed still picture (a little bit more wider)
     }
@@ -168,13 +168,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.62 - t * (1.62 - 1.20);
+        return 1.75 - t * (1.75 - 1.20);
       }
       return 1.20;
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 0.96 - t * (0.96 - 0.65);
+        return 1.06 - t * (1.06 - 0.65);
       }
       return 0.65;
     }
@@ -184,13 +184,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 20 - t * (20 - -16);
+        return 14 - t * (14 - -16);
       }
       return -16; // Freezed still picture
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 46 - t * (46 - 20);
+        return 34 - t * (34 - 20);
       }
       return 20; // Freezed still picture
     }
@@ -320,6 +320,10 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             <div className="relative filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105">
               <div
                 className="relative w-[340px] xs:w-[420px] sm:w-[540px] md:w-[640px] lg:w-[700px] aspect-[664/169]"
+                style={{
+                  WebkitMaskImage: "linear-gradient(140deg, #000 0%, #000 52%, rgba(0,0,0,0.75) 65%, rgba(0,0,0,0.38) 82%, rgba(0,0,0,0.15) 96%, rgba(0,0,0,0.06) 100%)",
+                  maskImage: "linear-gradient(140deg, #000 0%, #000 52%, rgba(0,0,0,0.75) 65%, rgba(0,0,0,0.38) 82%, rgba(0,0,0,0.15) 96%, rgba(0,0,0,0.06) 100%)",
+                }}
               >
                 <Image
                   src="/logo-dark.png"
