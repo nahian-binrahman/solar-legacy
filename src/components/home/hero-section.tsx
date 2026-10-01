@@ -152,13 +152,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 2.35 - t * (2.35 - 1.28);
+        return 1.65 - t * (1.65 - 1.28);
       }
       return 1.28; // Freezed still picture (a little bit more wider)
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.35 - t * (1.35 - 0.73);
+        return 1.05 - t * (1.05 - 0.73);
       }
       return 0.73; // Freezed still picture (a little bit more wider)
     }
@@ -168,13 +168,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 2.30 - t * (2.30 - 1.20);
+        return 1.62 - t * (1.62 - 1.20);
       }
       return 1.20;
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.25 - t * (1.25 - 0.65);
+        return 0.96 - t * (0.96 - 0.65);
       }
       return 0.65;
     }
@@ -190,7 +190,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 38 - t * (38 - 20);
+        return 46 - t * (46 - 20);
       }
       return 20; // Freezed still picture
     }
@@ -319,11 +319,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             {/* Solar Legacy Logo with outer drop-shadow to prevent rectangular clipping */}
             <div className="relative filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105">
               <div
-                className="relative w-[350px] xs:w-[430px] sm:w-[560px] md:w-[680px] lg:w-[750px] aspect-[664/169]"
-                style={{
-                  WebkitMaskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
-                  maskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
-                }}
+                className="relative w-[340px] xs:w-[420px] sm:w-[540px] md:w-[640px] lg:w-[700px] aspect-[664/169]"
               >
                 <Image
                   src="/logo-dark.png"
