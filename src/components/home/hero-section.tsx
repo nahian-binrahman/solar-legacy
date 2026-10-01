@@ -300,7 +300,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: logoScrollOpacity,
             pointerEvents: logoPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-[9%] xs:top-[10%] sm:top-[9.5%] md:top-[9.5%] lg:top-[10%] z-10 flex flex-col items-center select-none w-full px-4"
+          className="absolute left-1/2 -translate-x-1/2 top-5 xs:top-6 sm:top-7 md:top-8 lg:top-9 z-10 flex flex-col items-center select-none w-full px-4"
         >
           {/* Inner motion div: Rises up from behind roofline over 1.05s on initial load */}
           <motion.div
