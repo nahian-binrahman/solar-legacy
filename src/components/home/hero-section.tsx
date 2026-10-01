@@ -64,98 +64,132 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   // PARALLAX & ANIMATION TRANSFORMS
   // =========================================================================
 
-  // 1. Background Nature Parallax: moves subtly with cinematic scale
-  const bgY = useTransform(smoothProgress, [0, 1], [0, 50]);
-  const bgScale = useTransform(smoothProgress, [0, 1], [1.02, 1.12]);
+  // 1. Background Nature Parallax: moves subtly on 1st scroll, then freezes like a still picture
+  const bgY = useTransform(smoothProgress, (p) => (p <= 0.20 ? (p / 0.20) * 20 : 20));
+  const bgScale = useTransform(smoothProgress, (p) => (p <= 0.20 ? 1.02 + (p / 0.20) * 0.04 : 1.06));
   const bgOpacity = useTransform(smoothProgress, [0, 0.85, 1], [1, 0.95, 0.35]);
 
   // Sun flare parallax, dynamic radiance, and cursor/touch drift
   const sunGlowX = useTransform(mouseX, [0, 1], [-25, 25]);
   const sunGlowY = useTransform(smoothProgress, [0, 1], [0, 40]);
   const sunGlowScale = useTransform(smoothProgress, [0, 1], [1, 1.25]);
+  const sunGlowOpacity = useTransform(smoothProgress, (p) => (p <= 0.20 ? 1 - (p / 0.20) * 0.9 : 0.1));
 
   // 2. PHASE 1: SOLAR LEGACY LOGO
   // Starts with 1.05s load animation rising from behind roofline.
-  // On 1st scroll (0.05 to 0.22), it smoothly fades and moves up.
-  const logoScrollOpacity = useTransform(smoothProgress, [0, 0.04, 0.20], [1, 0.9, 0]);
-  const logoScrollY = useTransform(smoothProgress, [0, 0.20], [0, -35]);
-  const logoScrollScale = useTransform(smoothProgress, [0, 0.20], [1, 0.94]);
-  const logoPointerEvents = useTransform(smoothProgress, (val) => (val < 0.12 ? "auto" : "none"));
+  // On 1st scroll (0 to 0.16), it smoothly fades and moves up.
+  const logoScrollOpacity = useTransform(smoothProgress, (p) => (p <= 0.15 ? 1 - p / 0.15 : 0));
+  const logoScrollY = useTransform(smoothProgress, (p) => (p <= 0.15 ? -(p / 0.15) * 35 : -35));
+  const logoScrollScale = useTransform(smoothProgress, (p) => (p <= 0.15 ? 1 - (p / 0.15) * 0.06 : 0.94));
+  const logoPointerEvents = useTransform(smoothProgress, (p) => (p < 0.08 ? "auto" : "none"));
 
   // Minimalist scroll cue visible on mobile initial load
   const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.04], [1, 0]);
 
+  // 3. PHASE 2: EMERGING HEADLINE, SUBTITLE, CTA BUTTONS & STAT CARDS
+  // On 1st scroll (0.04 to 0.20), the animation executes.
+  // On 2nd scroll (0.20 to 0.50), the entire scene freezes like a still picture.
+  const textOpacity = useTransform(smoothProgress, (p) => (p < 0.04 ? 0 : Math.min(1, (p - 0.04) / 0.14)));
+  const textY = useTransform(smoothProgress, (p) => (p <= 0.20 ? 30 - (p / 0.20) * 30 : 0));
+  const textScale = useTransform(smoothProgress, (p) => (p <= 0.20 ? 0.95 + (p / 0.20) * 0.05 : 1));
+  const textPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.08 ? "auto" : "none"));
 
+  // 4. STAT CARDS (REVEAL ON 1ST SCROLL, FREEZE ON 2ND SCROLL, SPREAD ON 3RD SCROLL AS SCREEN SCROLLS DOWN)
+  const cardsOpacity = useTransform(smoothProgress, (p) => (p < 0.04 ? 0 : Math.min(1, (p - 0.04) / 0.14)));
+  const cardsY = useTransform(smoothProgress, (p) => (p <= 0.20 ? 25 - (p / 0.20) * 25 : 0));
+  const cardsScale = useTransform(smoothProgress, (p) => (p <= 0.20 ? 0.95 + (p / 0.20) * 0.05 : 1));
+  const cardsPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.08 ? "auto" : "none"));
 
-  // 3. PHASE 2: EMERGING HEADLINE, SUBTITLE & CTA BUTTONS (REVEALS ON 1ST SCROLL)
-  // Rises up and fades in as logo departs (0.12 to 0.30), stays visible through scroll phase 2 & 3
-  const textOpacity = useTransform(smoothProgress, [0.12, 0.28, 0.78, 0.96], [0, 1, 1, 0.2]);
-  const textY = useTransform(smoothProgress, [0.12, 0.28, 0.85, 1], [70, 0, 0, -30]);
-  const textScale = useTransform(smoothProgress, [0.12, 0.28], [0.94, 1]);
-  const textPointerEvents = useTransform(smoothProgress, (val) => (val >= 0.16 && val <= 0.85 ? "auto" : "none"));
+  // Responsive max gap spread distance for left and right cards
+  const [spreadDistance, setSpreadDistance] = React.useState(60);
 
-  // 4. PHASE 3: 3 STAT CARDS (REVEALS ON 2ND SCROLL)
-  // Slides up and fades in after headline has settled (0.38 to 0.60)
-  const cardsOpacity = useTransform(smoothProgress, [0.38, 0.58, 0.85, 1], [0, 1, 1, 0.25]);
-  const cardsY = useTransform(smoothProgress, [0.38, 0.58, 0.85, 1], [45, 0, 0, -20]);
-  const cardsScale = useTransform(smoothProgress, [0.38, 0.58], [0.94, 1]);
-  const cardsPointerEvents = useTransform(smoothProgress, (val) => (val >= 0.45 && val <= 0.88 ? "auto" : "none"));
+  // Side gap between 3 cards increases during 3rd scroll (0.50 -> 0.95)
+  // as the screen reaches the end of the hero container and scrolls down
+  const cardSpread = useTransform(smoothProgress, (p) => {
+    if (p <= 0.50) return 0;
+    if (p <= 0.95) {
+      const t = (p - 0.50) / (0.95 - 0.50);
+      // Smooth cubic easeInOut for fluid animation
+      const eased = t * t * (3 - 2 * t);
+      return eased * spreadDistance;
+    }
+    return spreadDistance;
+  });
+
+  const leftCardX = useTransform(cardSpread, (v) => -v);
+  const rightCardX = useTransform(cardSpread, (v) => v);
+
+  // Side dark vignettes beside the wall: reveals with 1st scroll into the settled scene
+  const sideVignetteOpacity = useTransform(smoothProgress, (p) => (p < 0.04 ? 0 : Math.min(1, (p - 0.04) / 0.14)));
 
   // Mobile detection for responsive zoom & positioning
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
+    const checkDimensions = () => {
+      const w = window.innerWidth;
+      setIsMobile(w < 640);
+      if (w < 640) {
+        setSpreadDistance(14);
+      } else if (w < 1024) {
+        setSpreadDistance(38);
+      } else {
+        setSpreadDistance(65);
+      }
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    checkDimensions();
+    window.addEventListener("resize", checkDimensions);
+    return () => window.removeEventListener("resize", checkDimensions);
   }, []);
 
   // 5. House Cutout Parallax & Responsive Zoom:
-  // Mobile:
-  // - Phase 1 (load): Zoomed-in (1.88) for grand prominent architectural solar presence.
-  // - Phase 2 (1st scroll): Smoothly zooms out (1.22) revealing full house width from garage to porch.
-  // - Phase 3 (last scroll): Settles at 1.15 ("a little bit small, not too much zoom out") cleanly above stat cards.
-  // Desktop: Starts at 1.0 and smoothly zooms out to 0.68 -> 0.58.
-  const houseScale = useTransform(smoothProgress, (p) => {
+  // After 1st scroll (p > 0.20), the scene is frozen like a still picture!
+  // houseScaleX expands horizontally for a majestic wide architectural estate presence.
+  const houseScaleX = useTransform(smoothProgress, (p) => {
     if (isMobile) {
-      if (p <= 0.26) {
-        const t = p / 0.26;
-        return 1.88 - t * (1.88 - 1.22);
-      } else {
-        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
-        return 1.22 - t * (1.22 - 1.15);
+      if (p <= 0.20) {
+        const t = p / 0.20;
+        return 1.85 - t * (1.85 - 1.28);
       }
+      return 1.28; // Freezed still picture (a little bit more wider)
     } else {
-      if (p <= 0.26) {
-        const t = p / 0.26;
-        return 1 - t * (1 - 0.68);
-      } else {
-        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
-        return 0.68 - t * (0.68 - 0.58);
+      if (p <= 0.20) {
+        const t = p / 0.20;
+        return 1 - t * (1 - 0.73);
       }
+      return 0.73; // Freezed still picture (a little bit more wider)
+    }
+  });
+
+  const houseScaleY = useTransform(smoothProgress, (p) => {
+    if (isMobile) {
+      if (p <= 0.20) {
+        const t = p / 0.20;
+        return 1.85 - t * (1.85 - 1.20);
+      }
+      return 1.20;
+    } else {
+      if (p <= 0.20) {
+        const t = p / 0.20;
+        return 1 - t * (1 - 0.65);
+      }
+      return 0.65;
     }
   });
 
   const houseY = useTransform(smoothProgress, (p) => {
     if (isMobile) {
-      if (p <= 0.26) {
-        const t = p / 0.26;
-        return 0 - t * 35;
-      } else {
-        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
-        return -35 - t * 33;
+      if (p <= 0.20) {
+        const t = p / 0.20;
+        return 25 - t * 41;
       }
+      return -16; // Freezed still picture
     } else {
-      if (p <= 0.26) {
-        const t = p / 0.26;
-        return 0 + t * 55;
-      } else {
-        const t = Math.min(1, (p - 0.26) / (0.85 - 0.26));
-        return 55 + t * (95 - 55);
+      if (p <= 0.20) {
+        const t = p / 0.20;
+        return 35 - t * (35 - 20);
       }
+      return 20; // Freezed still picture
     }
   });
 
@@ -211,7 +245,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
-      className="relative w-full h-[280vh] bg-forest-950"
+      className="relative w-full h-[195vh] bg-forest-950"
     >
       {/* Sticky Viewport Stage: Locks screen while the 3-phase emergence unfolds */}
       <section
@@ -238,16 +272,16 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             />
 
             {/* Top vignette for crisp navbar contrast */}
-            <div className="absolute inset-x-0 top-0 h-36 sm:h-44 bg-gradient-to-b from-forest-950/85 via-forest-950/30 to-transparent" />
+            <div className="absolute inset-x-0 top-0 h-36 sm:h-44 bg-gradient-to-b from-forest-950/85 via-forest-950/30 to-transparent pointer-events-none" />
 
-            {/* Ambient solar flare glow in sky with cursor & touch interaction */}
+            {/* Ambient solar flare glow in sky with cursor & touch interaction (dims on scroll) */}
             <motion.div
-              style={{ x: sunGlowX, y: sunGlowY, scale: sunGlowScale }}
+              style={{ x: sunGlowX, y: sunGlowY, scale: sunGlowScale, opacity: sunGlowOpacity }}
               className="absolute top-[14%] sm:top-[14%] left-1/2 -translate-x-1/2 w-[340px] xs:w-[480px] sm:w-[720px] h-[220px] sm:h-[340px] bg-gradient-radial from-solar-400/28 via-solar-300/12 to-transparent blur-[70px] sm:blur-[110px] pointer-events-none"
             />
 
-            {/* Bottom vignette to blend into ground and bottom cards */}
-            <div className="absolute inset-x-0 bottom-0 h-40 sm:h-48 bg-gradient-to-t from-forest-950/95 via-forest-950/50 to-transparent" />
+            {/* Bottom vignette to blend into ground */}
+            <div className="absolute inset-x-0 bottom-0 h-40 sm:h-48 bg-gradient-to-t from-forest-950/95 via-forest-950/50 to-transparent pointer-events-none" />
           </div>
         </motion.div>
 
@@ -279,33 +313,27 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             {/* Ambient golden sun radiance behind logo */}
             <div className="absolute inset-0 -top-6 bg-solar-400/25 blur-3xl rounded-full scale-150 pointer-events-none" />
 
-            {/* Solar Legacy Logo Image - Vector sharp HD */}
-            <div className="relative w-[240px] xs:w-[280px] sm:w-[360px] md:w-[440px] lg:w-[480px] aspect-[664/169]">
-              <Image
-                src="/logo-dark.png"
-                alt="Solar Legacy"
-                fill
-                priority
-                sizes="(max-width: 640px) 280px, (max-width: 1024px) 440px, 480px"
-                quality={100}
-                className="object-contain filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105"
-              />
+            {/* Solar Legacy Logo with outer drop-shadow to prevent rectangular clipping */}
+            <div className="relative filter drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] brightness-105">
+              <div
+                className="relative w-[240px] xs:w-[280px] sm:w-[360px] md:w-[440px] lg:w-[480px] aspect-[664/169]"
+                style={{
+                  WebkitMaskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
+                  maskImage: "linear-gradient(to bottom, #000 65%, rgba(0,0,0,0.22) 90%, rgba(0,0,0,0.05) 100%)",
+                }}
+              >
+                <Image
+                  src="/logo-dark.png"
+                  alt="Solar Legacy"
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 440px, 480px"
+                  quality={100}
+                  className="object-contain"
+                />
+              </div>
             </div>
 
-            {/* Subheading revealed after load */}
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.9,
-                delay: 0.35,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="text-xs sm:text-sm text-beige-100/90 font-light text-center max-w-xs sm:max-w-md mt-2.5 sm:mt-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] leading-relaxed px-3"
-            >
-              {content?.subtitle ||
-                "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency."}
-            </motion.p>
 
             {/* Scroll cue for mobile view only */}
             <motion.div
@@ -334,27 +362,10 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: textOpacity,
             pointerEvents: textPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-[9%] xs:top-[10%] sm:top-[13%] md:top-[15%] w-full max-w-4xl px-4 flex flex-col items-center text-center z-10"
+          className="absolute left-1/2 -translate-x-1/2 top-[68px] sm:top-[72px] md:top-[76px] w-full max-w-3xl sm:max-w-4xl px-4 flex flex-col items-center text-center z-25"
         >
-          {/* Top Badge */}
-          <div className="mb-1.5 sm:mb-2.5">
-            <Badge
-              variant="glass"
-              size="default"
-              dot
-              dotColor="solar"
-              pulse
-              onClick={() => sounds.playEnergySurge()}
-              onMouseEnter={() => sounds.playHover()}
-              className="border-solar-400/40 text-beige-100 px-3 sm:px-3.5 py-0.5 sm:py-1 shadow-[0_4px_25px_rgba(245,158,11,0.2)] bg-forest-950/90 backdrop-blur-md text-[10px] sm:text-[11px] tracking-wide font-medium relative overflow-hidden group cursor-pointer"
-            >
-              <span className="relative z-10">{content?.badge || "Next-Gen Architectural Photovoltaics"}</span>
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-solar-400/25 to-transparent" />
-            </Badge>
-          </div>
-
           {/* Main Headline */}
-          <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-[42px] tracking-tight text-white leading-tight mb-2 sm:mb-3 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
+          <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-[36px] lg:text-[40px] tracking-tight text-white leading-[1.14] mb-2 sm:mb-2.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
             {content?.title ? (
               content.title
             ) : (
@@ -366,17 +377,17 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-[11px] xs:text-xs sm:text-sm lg:text-base text-beige-100/90 font-light leading-relaxed max-w-xs sm:max-w-2xl mb-3.5 sm:mb-5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] px-2 line-clamp-2 sm:line-clamp-none">
+          <p className="text-xs xs:text-[13px] sm:text-[14.5px] md:text-base text-beige-100/90 font-light leading-relaxed max-w-sm sm:max-w-2xl mb-3 sm:mb-3.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] px-2">
             {content?.subtitle ||
               "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency."}
           </p>
 
-          {/* CTA Buttons - Mobile and Desktop Optimized */}
-          <div className="flex flex-row items-center justify-center gap-2 xs:gap-3 sm:gap-4 w-full max-w-xs sm:max-w-none px-2">
+          {/* CTA Buttons - Mobile and Desktop Optimized (a little bit bigger) */}
+          <div className="flex flex-row items-center justify-center gap-2.5 xs:gap-3.5 sm:gap-4 w-full max-w-xs sm:max-w-none px-2">
             <Button
               variant="solar"
               size="default"
-              className="flex-1 sm:flex-initial font-bold text-forest-950 bg-gradient-to-r from-solar-400 to-solar-500 hover:from-solar-300 hover:to-solar-400 shadow-[0_4px_22px_rgba(245,158,11,0.4)] hover:shadow-[0_6px_28px_rgba(245,158,11,0.55)] group cursor-pointer h-9 sm:h-10 md:h-11 px-3 sm:px-6 text-[11px] xs:text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl border-none"
+              className="flex-1 sm:flex-initial font-bold text-forest-950 bg-gradient-to-r from-solar-400 to-solar-500 hover:from-solar-300 hover:to-solar-400 shadow-[0_4px_22px_rgba(245,158,11,0.45)] hover:shadow-[0_6px_28px_rgba(245,158,11,0.6)] group cursor-pointer h-9.5 sm:h-10 md:h-11 px-4.5 sm:px-6 text-xs sm:text-[13px] md:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl border-none"
               onMouseEnter={() => sounds.playHover()}
               onClick={() => {
                 sounds.playPrimaryClick();
@@ -385,13 +396,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               }}
             >
               <span className="truncate">{content?.primaryCtaText || "Get Solar Quote"}</span>
-              <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 transition-transform group-hover:translate-x-1 shrink-0" />
+              <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1 shrink-0" />
             </Button>
 
             <Button
               variant="forestOutline"
               size="default"
-              className="flex-1 sm:flex-initial border border-white/25 bg-black/35 hover:bg-white/15 text-white cursor-pointer backdrop-blur-md h-9 sm:h-10 md:h-11 px-3 sm:px-6 text-[11px] xs:text-xs sm:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl shadow-lg"
+              className="flex-1 sm:flex-initial border border-solar-400/40 bg-[#06140e]/95 hover:bg-[#0d261b] hover:border-solar-400 text-white cursor-pointer backdrop-blur-md h-9.5 sm:h-10 md:h-11 px-4.5 sm:px-6 text-xs sm:text-[13px] md:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.8)] font-semibold"
               onMouseEnter={() => sounds.playHover()}
               onClick={() => {
                 sounds.playSecondaryClick();
@@ -399,10 +410,57 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
             >
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-solar-400 mr-1.5 shrink-0" />
+              <Sparkles className="w-4 h-4 text-solar-400 mr-1.5 shrink-0" />
               <span className="truncate">{content?.secondaryCtaText || "Explore Solutions"}</span>
             </Button>
           </div>
+        </motion.div>
+
+        {/* =========================================================================
+            LAYER 2C (Z-15): AMBIENT & SIDE DARK VIGNETTES
+            Reveals on 1st scroll:
+            1. Overall background darkening across the screen (low opacity ~38-45%).
+            2. Deep dark beside the lower walls (~75-77%) and solid dark at the bottom floor.
+           ========================================================================= */}
+        <motion.div
+          style={{ opacity: sideVignetteOpacity }}
+          className="absolute inset-0 z-[15] pointer-events-none select-none overflow-hidden"
+        >
+          {/* Overall ambient darkening overlay: low-opacity dark tint across the upper/middle screen */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0.60) 0%, rgba(2, 8, 5, 0.48) 35%, rgba(2, 8, 5, 0.52) 65%, rgba(2, 8, 5, 0.78) 85%, #020805 100%)",
+            }}
+          />
+
+          {/* Left side dark: starts lower beside the garage wall, opacity smoothly increasing top to bottom */}
+          <div
+            className="absolute bottom-0 top-[75%] sm:top-[76%] md:top-[77%] left-0 w-[30%] sm:w-[26%] lg:w-[24%]"
+            style={{
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.25) 25%, rgba(2, 8, 5, 0.6) 55%, rgba(2, 8, 5, 0.9) 80%, #020805 100%)",
+              WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 75%, transparent 100%)",
+              maskImage: "linear-gradient(to right, rgba(0,0,0,1) 75%, transparent 100%)",
+            }}
+          />
+
+          {/* Right side dark: starts lower beside the right wall, opacity smoothly increasing top to bottom */}
+          <div
+            className="absolute bottom-0 top-[75%] sm:top-[76%] md:top-[77%] right-0 w-[30%] sm:w-[26%] lg:w-[24%]"
+            style={{
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.25) 25%, rgba(2, 8, 5, 0.6) 55%, rgba(2, 8, 5, 0.9) 80%, #020805 100%)",
+              WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 75%, transparent 100%)",
+              maskImage: "linear-gradient(to left, rgba(0,0,0,1) 75%, transparent 100%)",
+            }}
+          />
+
+          {/* Bottom floor ground darkening: soft lower opacity increasing to bottom */}
+          <div
+            className="absolute bottom-0 top-[84%] sm:top-[85%] inset-x-0"
+            style={{
+              background: "linear-gradient(to bottom, rgba(3, 13, 8, 0) 0%, rgba(3, 13, 8, 0.25) 40%, rgba(3, 13, 8, 0.7) 100%)",
+            }}
+          />
         </motion.div>
 
         {/* =========================================================================
@@ -413,7 +471,8 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         <motion.div
           style={{
             y: houseY,
-            scale: houseScale,
+            scaleX: houseScaleX,
+            scaleY: houseScaleY,
             transformOrigin: "center 92%",
           }}
           className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center overflow-hidden"
@@ -433,8 +492,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         </motion.div>
 
         {/* =========================================================================
-            LAYER 4 (Z-30): PHASE 3 - 3 STAT CARDS (REVEALS ON 2ND SCROLL)
-            Positioned above the mobile bottom CTA bar with high-contrast opaque frosted glass.
+            LAYER 4 (Z-30): 3 STAT CARDS (HEAD STARTS A LITTLE UPPER TO HOUSE FLOOR)
            ========================================================================= */}
         <motion.div
           style={{
@@ -443,34 +501,36 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             opacity: cardsOpacity,
             pointerEvents: cardsPointerEvents,
           }}
-          className="absolute bottom-[92px] sm:bottom-6 md:bottom-8 inset-x-0 z-30 px-3 sm:px-6 max-w-5xl mx-auto w-full"
+          className="absolute bottom-2 sm:bottom-2.5 md:bottom-3 inset-x-0 z-30 px-3 sm:px-6 max-w-4xl mx-auto w-full"
         >
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 w-full">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 md:gap-3.5 w-full">
             {stats.map((stat, idx) => {
               const IconComponent = stat.icon;
+              const cardX = idx === 0 ? leftCardX : idx === 2 ? rightCardX : 0;
               return (
                 <motion.div
                   key={stat.label}
+                  style={{ x: cardX }}
                   whileHover={{ scale: 1.025, y: -2 }}
                   whileTap={{ scale: 0.97 }}
                   onMouseEnter={() => sounds.playCardHover(idx)}
                   onClick={() => sounds.playCardClick(idx)}
-                  className="group relative overflow-hidden rounded-xl p-2.5 sm:p-3.5 md:p-4 bg-[#05130d] border border-solar-400/40 transition-all duration-300 shadow-[0_16px_45px_rgba(0,0,0,0.95)] hover:border-solar-400/80 cursor-pointer"
+                  className="group relative overflow-hidden rounded-xl py-1.5 sm:py-2 px-2.5 sm:px-3 bg-[#05130d]/95 backdrop-blur-md border border-solar-400/40 transition-all duration-300 shadow-[0_12px_36px_rgba(0,0,0,0.95)] hover:border-solar-400/80 cursor-pointer"
                 >
-                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
-                    <div className="flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-forest-900 border border-solar-400/40 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm shrink-0">
-                      <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-2 text-center sm:text-left">
+                    <div className="flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-forest-900 border border-solar-400/40 text-solar-400 group-hover:bg-solar-400 group-hover:text-forest-950 transition-colors duration-300 shadow-sm shrink-0">
+                      <IconComponent className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </div>
                     <div className="flex flex-col min-w-0 w-full">
-                      <span className="font-heading font-extrabold text-sm sm:text-xl md:text-2xl text-white tracking-tight group-hover:text-solar-300 transition-colors leading-tight truncate">
+                      <span className="font-heading font-extrabold text-xs sm:text-base text-white tracking-tight group-hover:text-solar-300 transition-colors leading-tight truncate">
                         {stat.value}
                       </span>
-                      <span className="text-[7.5px] xs:text-[8.5px] sm:text-[9px] md:text-[11px] font-bold uppercase tracking-wider text-solar-400 font-mono truncate leading-tight mt-0.5">
+                      <span className="text-[6.5px] xs:text-[7.5px] sm:text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-solar-400 font-mono truncate leading-tight mt-0.5">
                         {stat.label}
                       </span>
                     </div>
                   </div>
-                  <p className="hidden sm:block text-[9px] md:text-[11px] text-white/70 mt-1.5 pl-9 sm:pl-12 font-light leading-snug line-clamp-1">
+                  <p className="hidden sm:block text-[7.5px] md:text-[8.5px] text-white/70 mt-0.5 pl-7 sm:pl-9 font-light leading-tight line-clamp-1">
                     {stat.detail}
                   </p>
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-solar-400/0 via-solar-400/60 to-solar-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
