@@ -168,13 +168,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.95 - t * (1.95 - 1.20);
+        return 1.85 - t * (1.85 - 1.20);
       }
       return 1.20;
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 1.15 - t * (1.15 - 0.65);
+        return 1.10 - t * (1.10 - 0.65);
       }
       return 0.65;
     }
@@ -184,13 +184,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (isMobile) {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 20 - t * (20 - -16);
+        return 28 - t * (28 - -16);
       }
       return -16; // Freezed still picture
     } else {
       if (p <= 0.20) {
         const t = p / 0.20;
-        return 42 - t * (42 - 20);
+        return 58 - t * (58 - 20);
       }
       return 20; // Freezed still picture
     }
@@ -478,13 +478,22 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             scaleY: houseScaleY,
             transformOrigin: "center 92%",
           }}
-          className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center overflow-hidden"
+          className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center"
         >
+          {/* Horizontal Ground Contact Shadow - runs parallel to the ground directly beneath the house foundation */}
+          <div
+            className="absolute -bottom-3 sm:-bottom-4 md:-bottom-6 inset-x-0 h-20 sm:h-28 md:h-36 pointer-events-none -z-10"
+            style={{
+              background: "radial-gradient(ellipse 98% 70% at 50% 30%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 45%, rgba(0, 0, 0, 0.35) 78%, transparent 100%)",
+              filter: "blur(10px)",
+            }}
+          />
+
           <div
             className="relative w-full h-[42vh] sm:w-full sm:h-full max-w-lg sm:max-w-none"
             style={{
-              WebkitMaskImage: "linear-gradient(to bottom, #000 85%, rgba(0,0,0,0.92) 92%, rgba(0,0,0,0.4) 97%, transparent 100%)",
-              maskImage: "linear-gradient(to bottom, #000 85%, rgba(0,0,0,0.92) 92%, rgba(0,0,0,0.4) 97%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, #000 84%, rgba(0,0,0,0.92) 89%, rgba(0,0,0,0.45) 96%, transparent 100%)",
+              maskImage: "linear-gradient(to bottom, #000 84%, rgba(0,0,0,0.92) 89%, rgba(0,0,0,0.45) 96%, transparent 100%)",
             }}
           >
             <Image
@@ -497,22 +506,39 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               className="object-contain object-bottom sm:object-cover sm:object-[center_60%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
               onError={() => setHouseSrc("/hero-house.png")}
             />
+
+            {/* Subtle horizontal foundation baseline shade: only darkens the bottom stone threshold */}
+            <div
+              className="absolute inset-x-0 bottom-0 h-8 sm:h-12 md:h-14 pointer-events-none"
+              style={{
+                background: "linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.45) 40%, rgba(0, 0, 0, 0.90) 100%)",
+              }}
+            />
           </div>
         </motion.div>
 
         {/* =========================================================================
-            LAYER 3B (Z-15): GROUND TERRAIN CONTACT SHADE (UNDER THE HOUSE)
-            Placed at z-[15] beneath the z-[20] house cutout:
-            Darkens the grass ground and terrain underneath the foundation so the house sits
-            naturally into the background, while the house walls remain 100% bright, crisp, and shade-free!
+            LAYER 3B (Z-15): HORIZONTAL GROUND TERRAIN DARK SHADE (UNDER THE HOUSE)
+            Runs parallel to the floor across the terrain in the first scene,
+            firmly anchoring the house so it feels deeply grounded into the background.
            ========================================================================= */}
         <div
-          className="absolute inset-x-0 bottom-0 h-32 sm:h-44 md:h-52 z-[15] pointer-events-none select-none"
+          className="absolute inset-x-0 bottom-0 h-44 sm:h-56 md:h-72 z-[15] pointer-events-none select-none"
         >
+          {/* Deep horizontal terrain shade parallel to the ground */}
           <div
             className="w-full h-full"
             style={{
-              background: "linear-gradient(to bottom, rgba(1, 6, 4, 0) 0%, rgba(1, 6, 4, 0.40) 35%, rgba(1, 6, 4, 0.85) 75%, #010604 100%)",
+              background: "linear-gradient(to bottom, rgba(1, 5, 3, 0) 0%, rgba(1, 5, 3, 0.60) 30%, rgba(1, 5, 3, 0.94) 65%, #010503 100%)",
+            }}
+          />
+
+          {/* Deep horizontal contact shadow strip running parallel to the ground */}
+          <div
+            className="absolute inset-x-0 bottom-8 sm:bottom-12 md:bottom-18 h-24 sm:h-32 opacity-95"
+            style={{
+              background: "radial-gradient(ellipse 98% 70% at 50% 50%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.90) 48%, rgba(0, 0, 0, 0.40) 80%, transparent 100%)",
+              filter: "blur(10px)",
             }}
           />
         </div>
