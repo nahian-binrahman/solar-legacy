@@ -69,74 +69,116 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   }, []);
 
   // =========================================================================
-  // AUTONOMOUS CINEMATIC TIMELINE CONTROLLER
-  // The first scroll gesture acts as a trigger, not a scrub timeline controller.
-  // Once triggered:
-  // - Plays the complete cinematic transition automatically (no stopping halfway).
-  // - Fixed duration (2.4s forward, 2.0s reverse).
-  // - On reverse scroll: smoothly reverses back to the initial loaded state.
+  // TWO-STAGE SCROLL INTERACTION CONTROLLER
+  // Stage 1 (First Scroll): Logo exit, house camera settle, content reveal, compact cards appear.
+  // Stage 2 (Second Scroll): Bottom cards spacing expands horizontally with breathing room.
+  // Both stages support full bidirectional playback.
   // =========================================================================
-  const timelineProgress = useMotionValue(0);
-  const animControlsRef = React.useRef<{ stop: () => void } | null>(null);
-  const heroStateRef = React.useRef<"initial" | "playing_forward" | "completed" | "playing_reverse">("initial");
+  const heroProgress = useMotionValue(0);
+  const cardProgress = useMotionValue(0);
 
-  const getCheckpointY = React.useCallback(() => {
-    if (!containerRef.current) return window.innerHeight * 0.9;
-    return containerRef.current.offsetHeight - window.innerHeight;
+  const heroAnimRef = React.useRef<{ stop: () => void } | null>(null);
+  const cardAnimRef = React.useRef<{ stop: () => void } | null>(null);
+
+  // Phase tracking:
+  // 0: Initial loaded hero state
+  // 1: First scroll complete (Content visible, house large, cards compact)
+  // 2: Second scroll complete (Cards expanded horizontally with breathing room)
+  const phaseRef = React.useRef<0 | 1 | 2>(0);
+
+  const getCheckpoints = React.useCallback(() => {
+    if (!containerRef.current) {
+      const vh = window.innerHeight;
+      return { cp1: vh * 0.45, cp2: vh * 0.95 };
+    }
+    const total = containerRef.current.offsetHeight - window.innerHeight;
+    return {
+      cp1: total * 0.45,
+      cp2: total * 0.95,
+    };
   }, []);
 
-  const playForward = React.useCallback(() => {
-    if (heroStateRef.current === "completed" || heroStateRef.current === "playing_forward") return;
-    heroStateRef.current = "playing_forward";
-    if (animControlsRef.current) animControlsRef.current.stop();
+  // First Scroll Sequence Forward:
+  const playHeroForward = React.useCallback(() => {
+    if (phaseRef.current !== 0) return;
+    phaseRef.current = 1;
+    if (heroAnimRef.current) heroAnimRef.current.stop();
 
-    // Autonomous animation timeline: plays smoothly to completion regardless of user scroll activity
-    animControlsRef.current = animate(timelineProgress, 1, {
-      duration: 2.4,
+    heroAnimRef.current = animate(heroProgress, 1, {
+      duration: 2.2,
       ease: [0.16, 1, 0.3, 1],
-      onComplete: () => {
-        heroStateRef.current = "completed";
-      },
     });
 
-    const checkpointY = getCheckpointY();
-    window.scrollTo({ top: checkpointY, behavior: "smooth" });
-  }, [timelineProgress, getCheckpointY]);
+    const { cp1 } = getCheckpoints();
+    window.scrollTo({ top: cp1, behavior: "smooth" });
+  }, [heroProgress, getCheckpoints]);
 
-  const playReverse = React.useCallback(() => {
-    if (heroStateRef.current === "initial" || heroStateRef.current === "playing_reverse") return;
-    heroStateRef.current = "playing_reverse";
-    if (animControlsRef.current) animControlsRef.current.stop();
+  // Second Scroll Sequence Forward (Cards only):
+  const playCardsForward = React.useCallback(() => {
+    if (phaseRef.current !== 1) return;
+    phaseRef.current = 2;
+    if (cardAnimRef.current) cardAnimRef.current.stop();
 
-    // Autonomous reverse timeline: reverses smoothly to initial state
-    animControlsRef.current = animate(timelineProgress, 0, {
-      duration: 2.0,
+    cardAnimRef.current = animate(cardProgress, 1, {
+      duration: 1.2,
       ease: [0.16, 1, 0.3, 1],
-      onComplete: () => {
-        heroStateRef.current = "initial";
-      },
+    });
+
+    const { cp2 } = getCheckpoints();
+    window.scrollTo({ top: cp2, behavior: "smooth" });
+  }, [cardProgress, getCheckpoints]);
+
+  // Second Scroll Sequence Reverse (Cards contract back to compact):
+  const playCardsReverse = React.useCallback(() => {
+    if (phaseRef.current !== 2) return;
+    phaseRef.current = 1;
+    if (cardAnimRef.current) cardAnimRef.current.stop();
+
+    cardAnimRef.current = animate(cardProgress, 0, {
+      duration: 1.0,
+      ease: [0.16, 1, 0.3, 1],
+    });
+
+    const { cp1 } = getCheckpoints();
+    window.scrollTo({ top: cp1, behavior: "smooth" });
+  }, [cardProgress, getCheckpoints]);
+
+  // First Scroll Sequence Reverse (Hero returns to initial loaded state):
+  const playHeroReverse = React.useCallback(() => {
+    if (phaseRef.current !== 1) return;
+    phaseRef.current = 0;
+    if (heroAnimRef.current) heroAnimRef.current.stop();
+
+    heroAnimRef.current = animate(heroProgress, 0, {
+      duration: 1.8,
+      ease: [0.16, 1, 0.3, 1],
     });
 
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [timelineProgress]);
+  }, [heroProgress]);
 
   React.useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       const scrollY = window.scrollY;
-      const checkpointY = getCheckpointY();
+      const { cp1, cp2 } = getCheckpoints();
 
-      // Forward trigger from top or initial:
       if (e.deltaY > 6) {
-        if (scrollY <= 60 && heroStateRef.current !== "completed" && heroStateRef.current !== "playing_forward") {
+        // Forward scroll down:
+        if (phaseRef.current === 0 && scrollY <= cp1 * 0.7) {
           e.preventDefault();
-          playForward();
+          playHeroForward();
+        } else if (phaseRef.current === 1 && scrollY <= cp2 + 40) {
+          e.preventDefault();
+          playCardsForward();
         }
-      }
-      // Reverse trigger from completed/checkpoint state:
-      else if (e.deltaY < -6) {
-        if (scrollY <= checkpointY + 60 && heroStateRef.current !== "initial" && heroStateRef.current !== "playing_reverse") {
+      } else if (e.deltaY < -6) {
+        // Reverse scroll up:
+        if (phaseRef.current === 2 && scrollY <= cp2 + 80) {
           e.preventDefault();
-          playReverse();
+          playCardsReverse();
+        } else if (phaseRef.current === 1 && scrollY <= cp1 + 50) {
+          e.preventDefault();
+          playHeroReverse();
         }
       }
     };
@@ -150,41 +192,61 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       const touchEndY = e.changedTouches[0].clientY;
       const deltaY = touchStartY - touchEndY;
       const scrollY = window.scrollY;
-      const checkpointY = getCheckpointY();
+      const { cp1, cp2 } = getCheckpoints();
 
       if (deltaY > 20) {
-        if (scrollY <= 60 && heroStateRef.current !== "completed" && heroStateRef.current !== "playing_forward") {
-          playForward();
+        if (phaseRef.current === 0 && scrollY <= cp1 * 0.7) {
+          playHeroForward();
+        } else if (phaseRef.current === 1 && scrollY <= cp2 + 40) {
+          playCardsForward();
         }
       } else if (deltaY < -20) {
-        if (scrollY <= checkpointY + 60 && heroStateRef.current !== "initial" && heroStateRef.current !== "playing_reverse") {
-          playReverse();
+        if (phaseRef.current === 2 && scrollY <= cp2 + 80) {
+          playCardsReverse();
+        } else if (phaseRef.current === 1 && scrollY <= cp1 + 50) {
+          playHeroReverse();
         }
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const scrollY = window.scrollY;
-      const checkpointY = getCheckpointY();
+      const { cp1, cp2 } = getCheckpoints();
       if (["ArrowDown", "PageDown", " "].includes(e.key)) {
-        if (scrollY <= 60 && heroStateRef.current !== "completed" && heroStateRef.current !== "playing_forward") {
-          playForward();
+        if (phaseRef.current === 0 && scrollY <= cp1 * 0.7) {
+          playHeroForward();
+        } else if (phaseRef.current === 1 && scrollY <= cp2 + 40) {
+          playCardsForward();
         }
       } else if (["ArrowUp", "PageUp"].includes(e.key)) {
-        if (scrollY <= checkpointY + 60 && heroStateRef.current !== "initial" && heroStateRef.current !== "playing_reverse") {
-          playReverse();
+        if (phaseRef.current === 2 && scrollY <= cp2 + 80) {
+          playCardsReverse();
+        } else if (phaseRef.current === 1 && scrollY <= cp1 + 50) {
+          playHeroReverse();
         }
       }
     };
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      const checkpointY = getCheckpointY();
+      const { cp1, cp2 } = getCheckpoints();
 
-      if (scrollY >= checkpointY * 0.75 && heroStateRef.current === "initial") {
-        playForward();
-      } else if (scrollY <= 5 && heroStateRef.current === "completed") {
-        playReverse();
+      if (scrollY >= cp2 * 0.85 && phaseRef.current < 2) {
+        phaseRef.current = 2;
+        heroProgress.set(1);
+        cardProgress.set(1);
+      } else if (scrollY >= cp1 * 0.7 && scrollY < cp2 * 0.85) {
+        if (phaseRef.current === 0) {
+          phaseRef.current = 1;
+          heroProgress.set(1);
+        } else if (phaseRef.current === 2) {
+          phaseRef.current = 1;
+          cardProgress.set(0);
+        }
+      } else if (scrollY <= 10 && phaseRef.current > 0) {
+        phaseRef.current = 0;
+        heroProgress.set(0);
+        cardProgress.set(0);
       }
     };
 
@@ -200,89 +262,54 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       window.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("scroll", handleScroll);
-      if (animControlsRef.current) animControlsRef.current.stop();
+      if (heroAnimRef.current) heroAnimRef.current.stop();
+      if (cardAnimRef.current) cardAnimRef.current.stop();
     };
-  }, [playForward, playReverse, getCheckpointY]);
+  }, [playHeroForward, playCardsForward, playCardsReverse, playHeroReverse, getCheckpoints, heroProgress, cardProgress]);
 
   // =========================================================================
-  // PARALLAX & ANIMATION TRANSFORMS DRIVEN BY AUTONOMOUS TIMELINE
-  // Timeline Stages:
-  // Forward:
-  // Initial state -> Logo disappears -> House camera movement -> Content reveal -> Cards reveal -> Complete
-  // Backward:
-  // Complete state -> Cards hide -> Content disappears -> House returns -> Logo returns -> Initial
+  // 1. FIRST SCROLL SEQUENCE (HERO TIMELINE):
+  // Handles: Logo exit, house camera settle, background parallax, heading/buttons reveal,
+  // and initial compact cards appearance (ZERO card spread, fixed compact gaps).
   // =========================================================================
 
-  // 1. Background Nature Parallax:
-  const bgScale = useTransform(timelineProgress, (p) => {
+  // Background Nature Parallax:
+  const bgScale = useTransform(heroProgress, (p) => {
     const initialScale = isMobile ? 1.25 : 1.15;
-    const stage1Scale = isMobile ? 1.24 : 1.135; // Kept close during first scroll
-    const finalScale = isMobile ? 1.18 : 1.08;
-
-    if (p <= 0.05) return initialScale;
-    if (p <= 0.55) {
-      const t = (p - 0.05) / (0.55 - 0.05);
-      const eased = t * t * (3 - 2 * t);
-      return initialScale - eased * (initialScale - stage1Scale);
-    }
-    const t = (p - 0.55) / (1.0 - 0.55);
-    const eased = t * t * (3 - 2 * t);
-    return stage1Scale - eased * (stage1Scale - finalScale);
+    const finalScale = isMobile ? 1.24 : 1.135; // Kept close during first scroll
+    const t = p * p * (3 - 2 * p);
+    return initialScale - t * (initialScale - finalScale);
   });
 
-  const bgZ = useTransform(timelineProgress, (p) => {
-    if (p <= 0.05) return 0;
-    if (p <= 0.55) {
-      const t = (p - 0.05) / (0.55 - 0.05);
-      return -t * 15;
-    }
-    const t = (p - 0.55) / (1.0 - 0.55);
-    const eased = t * t * (3 - 2 * t);
-    return -15 - eased * 70;
-  });
+  const bgZ = useTransform(heroProgress, [0, 1], [0, -15]);
 
-  const bgY = useTransform(timelineProgress, (p) => {
+  const bgY = useTransform(heroProgress, (p) => {
     const settleY = isMobile ? 12 : 16;
-    const finalY = isMobile ? 20 : 26;
-    if (p <= 0.18) {
-      const t = p / 0.18;
-      return t * t * (3 - 2 * t) * settleY;
-    }
-    const t = (p - 0.18) / (1.0 - 0.18);
-    const eased = t * t * (3 - 2 * t);
-    return settleY + eased * (finalY - settleY);
+    return p * p * (3 - 2 * p) * settleY;
   });
 
-  const bgOpacity = useTransform(timelineProgress, [0, 0.55, 0.70, 1], [1, 1, 0.90, 0.82]);
+  const bgOpacity = useTransform(heroProgress, [0, 1], [1, 0.95]);
 
   // Sun flare parallax, dynamic radiance, and cursor/touch drift
   const sunGlowX = useTransform(mouseX, [0, 1], [-25, 25]);
-  const sunGlowY = useTransform(timelineProgress, [0, 1], [0, 40]);
-  const sunGlowScale = useTransform(timelineProgress, [0, 1], [1, 1.25]);
-  const sunGlowOpacity = useTransform(timelineProgress, (p) => (p <= 0.50 ? 1 - (p / 0.50) * 0.80 : 0.20));
+  const sunGlowY = useTransform(heroProgress, [0, 1], [0, 30]);
+  const sunGlowScale = useTransform(heroProgress, [0, 1], [1, 1.15]);
+  const sunGlowOpacity = useTransform(heroProgress, [0, 0.6, 1], [1, 0.4, 0.25]);
 
-  // =========================================================================
-  // 2. LOGO BEHAVIOR:
-  // - Step 1: Moves downward ~4cm (~26px) with the crane settle
-  // - Step 2: Moves straight backward in 3D depth slowly and fades away
-  // - Disappears completely by p = 0.38
-  // =========================================================================
-  const logoProgress = useTransform(timelineProgress, (p) => {
+  // Logo Behavior: Moves down with settle, travels straight back into 3D depth, fades out
+  const logoProgress = useTransform(heroProgress, (p) => {
     const pStart = 0.01;
-    const pEnd = 0.38;
+    const pEnd = 0.42;
     if (p <= pStart) return 0;
     if (p >= pEnd) return 1;
     const t = (p - pStart) / (pEnd - pStart);
     return t * t * (3 - 2 * t);
   });
 
-  const logoScrollY = useTransform(timelineProgress, (p) => {
+  const logoScrollY = useTransform(heroProgress, (p) => {
     const settleY = isMobile ? 22 : 26;
-    if (p <= 0.18) {
-      const t = p / 0.18;
-      return t * t * (3 - 2 * t) * settleY;
-    }
-    return settleY;
+    const t = Math.min(1, p / 0.25);
+    return t * t * (3 - 2 * t) * settleY;
   });
 
   const logoScrollZ = useTransform(logoProgress, [0, 1], [0, -300]);
@@ -292,18 +319,14 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const logoScrollFilter = useTransform(logoScrollBlur, (b) => (b <= 0.2 ? "none" : `blur(${b.toFixed(1)}px)`));
   const logoPointerEvents = useTransform(logoProgress, (pr) => (pr < 0.50 ? "auto" : "none"));
 
-  const scrollIndicatorOpacity = useTransform(timelineProgress, [0, 0.06], [1, 0]);
+  const scrollIndicatorOpacity = useTransform(heroProgress, [0, 0.08], [1, 0]);
 
-  // =========================================================================
-  // 3. CONTENT REVEAL (MAIN HEADING, SUBHEADING & CTA BUTTONS):
-  // - Follows logo exit (starts at 0.30, settles by 0.62)
-  // - Emerges to foreground above the house (z-25)
-  // - House is STILL large, dominant, and close!
-  // =========================================================================
-  const textProgress = useTransform(timelineProgress, (p) => {
-    if (p <= 0.30) return 0;
-    if (p >= 0.62) return 1;
-    const t = (p - 0.30) / (0.62 - 0.30);
+  // Content Reveal (Heading, Subheading & CTA Buttons):
+  // Follows logo exit, foregrounded at z-25 above house roof
+  const textProgress = useTransform(heroProgress, (p) => {
+    if (p <= 0.32) return 0;
+    if (p >= 0.72) return 1;
+    const t = (p - 0.32) / (0.72 - 0.32);
     return 1 - Math.pow(1 - t, 2.5);
   });
 
@@ -312,84 +335,52 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const textBlur = useTransform(textProgress, [0, 1], [6, 0]);
   const textFilter = useTransform(textBlur, (b) => (b <= 0.2 ? "none" : `blur(${b}px)`));
   const textScale = useTransform(textProgress, [0, 1], [0.94, 1.0]);
-  const textPointerEvents = useTransform(timelineProgress, (p) => (p >= 0.45 ? "auto" : "none"));
+  const textPointerEvents = useTransform(heroProgress, (p) => (p >= 0.55 ? "auto" : "none"));
 
-  // =========================================================================
-  // 4. STATS CARDS REVEAL (REVEALS LAST):
-  // - Starts emerging at p = 0.60, completes by p = 0.95
-  // =========================================================================
-  const cardsProgress = useTransform(timelineProgress, (p) => {
-    if (p <= 0.60) return 0;
-    if (p >= 0.95) return 1.0;
-    const t = (p - 0.60) / (0.95 - 0.60);
-    return t * t * (3 - 2 * t);
+  // House Camera Movement in First Scroll:
+  // House stays LARGE & DOMINANT (almost same visual size, subtle depth only, grounded at baseline)
+  const houseY = useTransform(heroProgress, (p) => {
+    const settleY = isMobile ? 22 : 26;
+    const t = Math.min(1, p / 0.25);
+    return t * t * (3 - 2 * t) * settleY;
   });
 
-  const cardsOpacity = useTransform(cardsProgress, [0, 0.15, 1], [0, 0.20, 1]);
-  const cardsY = useTransform(cardsProgress, [0, 1], [55, 0]);
-  const cardsScale = useTransform(cardsProgress, [0, 1], [0.92, 1.0]);
-  const cardsPointerEvents = useTransform(cardsProgress, (cp) => (cp >= 0.70 ? "auto" : "none"));
+  const houseZ = useTransform(heroProgress, [0, 1], [0, -20]);
 
-  const cardSpread = useTransform(timelineProgress, (p) => {
-    if (p <= 0.70) return 0;
-    if (p >= 0.98) return spreadDistance;
-    const t = (p - 0.70) / (0.98 - 0.70);
-    return t * t * (3 - 2 * t) * spreadDistance;
+  const houseScale = useTransform(heroProgress, (p) => {
+    const initialScale = isMobile ? 1.06 : 1.03;
+    const stage1Scale = isMobile ? 1.04 : 1.01; // Kept large and dominant!
+    const t = p * p * (3 - 2 * p);
+    return initialScale - t * (initialScale - stage1Scale);
+  });
+
+  // Cards Appearance in First Scroll:
+  // Cards appear at the bottom in their fixed, compact position with UNCHANGED gaps
+  const cardsOpacity = useTransform(heroProgress, [0.45, 0.85], [0, 1]);
+  const cardsY = useTransform(heroProgress, [0.45, 0.85], [18, 0]);
+  const cardsScale = useTransform(heroProgress, [0.45, 0.85], [0.97, 1.0]);
+  const cardsPointerEvents = useTransform(heroProgress, (p) => (p >= 0.65 ? "auto" : "none"));
+
+  // Ambient overlay for contrast:
+  const sideVignetteOpacity = useTransform(heroProgress, (p) => {
+    if (p < 0.15) return 0;
+    if (p >= 0.50) return 1;
+    return (p - 0.15) / (0.50 - 0.15);
+  });
+
+  // =========================================================================
+  // 2. SECOND SCROLL SEQUENCE (CARDS TIMELINE ONLY):
+  // Triggered only after user scrolls again when first sequence is complete.
+  // Expands horizontal spacing between the 3 bottom cards, creating breathing room.
+  // House, background, and text content remain completely stable.
+  // =========================================================================
+  const cardSpread = useTransform(cardProgress, (p) => {
+    const eased = p * p * (3 - 2 * p);
+    return eased * spreadDistance;
   });
 
   const leftCardX = useTransform(cardSpread, (v) => -v);
   const rightCardX = useTransform(cardSpread, (v) => v);
-
-  // Ambient & floor shade overlay: reveals into the settled scene
-  const sideVignetteOpacity = useTransform(timelineProgress, (p) => {
-    if (p < 0.15) return 0;
-    if (p >= 0.45) return 1;
-    return (p - 0.15) / (0.45 - 0.15);
-  });
-
-  // =========================================================================
-  // 5. HOUSE CAMERA PULLBACK & FLOOR GROUNDING:
-  // - Step 1 (p: 0.00 -> 0.18): Settle downward ~4cm (~26px)
-  // - Stage 1 (p: 0.00 -> 0.55): House stays LARGE & DOMINANT (scale 1.03 -> 1.01, z: 0 -> -20px)
-  // - Stage 2 (p: 0.55 -> 1.00): Camera gradually pulls backward away from the estate (scale 1.01 -> 0.88, z: -20px -> -240px)
-  // - Floor dark shadow (Layer 3B) moves in 100% synchronization throughout all phases
-  // =========================================================================
-  const houseY = useTransform(timelineProgress, (p) => {
-    const settleY = isMobile ? 22 : 26;
-    if (p <= 0.18) {
-      const t = p / 0.18;
-      return t * t * (3 - 2 * t) * settleY;
-    }
-    return settleY;
-  });
-
-  const houseZ = useTransform(timelineProgress, (p) => {
-    if (p <= 0.05) return 0;
-    if (p <= 0.55) {
-      const t = (p - 0.05) / (0.55 - 0.05);
-      const eased = t * t * (3 - 2 * t);
-      return -eased * 20;
-    }
-    const t = (p - 0.55) / (1.0 - 0.55);
-    const eased = t * t * (3 - 2 * t);
-    return -20 - eased * (240 - 20);
-  });
-
-  const houseScale = useTransform(timelineProgress, (p) => {
-    const initialScale = isMobile ? 1.06 : 1.03;
-    const stage1Scale = isMobile ? 1.04 : 1.01; // House stays large and dominant during first scroll!
-    const finalScale = isMobile ? 0.92 : 0.88;  // Pullback achieved during later scroll
-
-    if (p <= 0.05) return initialScale;
-    if (p <= 0.55) {
-      const t = (p - 0.05) / (0.55 - 0.05);
-      const eased = t * t * (3 - 2 * t);
-      return initialScale - eased * (initialScale - stage1Scale);
-    }
-    const t = (p - 0.55) / (1.0 - 0.55);
-    const eased = t * t * (3 - 2 * t);
-    return stage1Scale - eased * (stage1Scale - finalScale);
-  });
 
   const defaultStats = [
     {
