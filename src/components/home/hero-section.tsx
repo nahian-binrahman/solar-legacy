@@ -85,55 +85,166 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   // PARALLAX & ANIMATION TRANSFORMS
   // =========================================================================
 
-  // 1. Background Nature Parallax: deeply zoomed in on initial load (1.35 desktop / 1.45 mobile), then settles smoothly (1.06)
-  const bgY = useTransform(smoothProgress, (p) => (p <= 0.20 ? (p / 0.20) * 20 : 20));
+  // =========================================================================
+  // MULTI-STAGE ARCHITECTURAL CAMERA TIMELINE
+  // Stage 1 (p: 0.00 -> 0.050): Camera Crane Downward Settle (~4cm / ~40px)
+  // Stage 2 (p: 0.005 -> 0.150): Logo Exit & Subtle Initial Camera Depth
+  // Stage 3 (p: 0.110 -> 0.200): Content Reveal while House Stays Large & Dominant
+  // Checkpoint 1 (p ~ 0.22): House is large & dominant, logo gone, text fully revealed, cards just peeking at bottom
+  // Stage 4 (p: 0.220 -> 0.500): Later Scroll - Camera Pulls Backward, Deep Parallax, Cards Fully Elevate
+  // Stage 5 (p: 0.550 -> 0.950): Horizontal Card Expansion into Next Section
+  // =========================================================================
+
+  // 1. Background Nature Parallax:
+  // - First scroll: settles downward slightly (~18px desktop, ~14px mobile) and stays close (1.15 -> 1.135)
+  // - Later scroll: pulls backward into deep parallax (1.135 -> 1.08, z: -18px -> -85px)
   const bgScale = useTransform(smoothProgress, (p) => {
-    const initialScale = isMobile ? 1.65 : 1.50;
-    if (p <= 0.20) {
-      return initialScale - (p / 0.20) * (initialScale - 1.06);
+    const initialScale = isMobile ? 1.25 : 1.15;
+    const stage1Scale = isMobile ? 1.23 : 1.135; // Kept close during first scroll!
+    const finalScale = isMobile ? 1.18 : 1.08;
+
+    if (p <= 0.04) return initialScale;
+    if (p <= 0.22) {
+      const t = (p - 0.04) / (0.22 - 0.04);
+      const eased = t * t * (3 - 2 * t);
+      return initialScale - eased * (initialScale - stage1Scale);
     }
-    return 1.06;
+    if (p <= 0.50) {
+      const t = (p - 0.22) / (0.50 - 0.22);
+      const eased = t * t * (3 - 2 * t);
+      return stage1Scale - eased * (stage1Scale - finalScale);
+    }
+    return finalScale;
   });
-  const bgOpacity = useTransform(smoothProgress, [0, 0.85, 1], [1, 0.95, 0.35]);
+
+  const bgZ = useTransform(smoothProgress, (p) => {
+    if (p <= 0.04) return 0;
+    if (p <= 0.22) {
+      const t = (p - 0.04) / (0.22 - 0.04);
+      return -t * 18;
+    }
+    if (p <= 0.50) {
+      const t = (p - 0.22) / (0.50 - 0.22);
+      const eased = t * t * (3 - 2 * t);
+      return -18 - eased * (85 - 18);
+    }
+    return -85;
+  });
+
+  const bgY = useTransform(smoothProgress, (p) => {
+    const settleY = isMobile ? 14 : 18;
+    const finalY = isMobile ? 22 : 28;
+    if (p <= 0.050) {
+      const t = p / 0.050;
+      return t * t * (3 - 2 * t) * settleY;
+    }
+    if (p <= 0.50) {
+      const t = (p - 0.050) / (0.50 - 0.050);
+      const eased = t * t * (3 - 2 * t);
+      return settleY + eased * (finalY - settleY);
+    }
+    return finalY;
+  });
+
+  // Background opacity transition when cards reveal (maintaining house prominence)
+  const bgOpacity = useTransform(smoothProgress, [0, 0.24, 0.35, 0.85, 1], [1, 1, 0.85, 0.80, 0.35]);
 
   // Sun flare parallax, dynamic radiance, and cursor/touch drift
   const sunGlowX = useTransform(mouseX, [0, 1], [-25, 25]);
   const sunGlowY = useTransform(smoothProgress, [0, 1], [0, 40]);
   const sunGlowScale = useTransform(smoothProgress, [0, 1], [1, 1.25]);
-  const sunGlowOpacity = useTransform(smoothProgress, (p) => (p <= 0.20 ? 1 - (p / 0.20) * 0.9 : 0.1));
+  const sunGlowOpacity = useTransform(smoothProgress, (p) => (p <= 0.22 ? 1 - (p / 0.22) * 0.85 : 0.15));
 
-  // 2. PHASE 1: SOLAR LEGACY LOGO
-  // Starts with 1.05s load animation rising from behind roofline.
-  // On 1st scroll (0 to 0.16), it smoothly fades and moves up.
-  const logoScrollOpacity = useTransform(smoothProgress, (p) => (p <= 0.15 ? 1 - p / 0.15 : 0));
-  const logoScrollY = useTransform(smoothProgress, (p) => (p <= 0.15 ? -(p / 0.15) * 35 : -35));
-  const logoScrollScale = useTransform(smoothProgress, (p) => (p <= 0.15 ? 1 - (p / 0.15) * 0.06 : 0.94));
-  const logoPointerEvents = useTransform(smoothProgress, (p) => (p < 0.08 ? "auto" : "none"));
+  // =========================================================================
+  // 2. LOGO BEHAVIOR:
+  // - Step 1: Moves downward ~4cm (~40px) with the house
+  // - Step 2: Moves straight backward in 3D depth slowly and fades away
+  // - Fades out completely by p = 0.150 before content reveal completes
+  // =========================================================================
+  const logoProgress = useTransform(smoothProgress, (p) => {
+    const pStart = 0.005;
+    const pEnd = 0.150;
+    if (p <= pStart) return 0;
+    if (p >= pEnd) return 1;
+    const t = (p - pStart) / (pEnd - pStart);
+    return t * t * (3 - 2 * t);
+  });
+
+  const logoScrollY = useTransform(smoothProgress, (p) => {
+    const settleY = isMobile ? 36 : 40;
+    if (p <= 0.050) {
+      const t = p / 0.050;
+      return t * t * (3 - 2 * t) * settleY;
+    }
+    return settleY;
+  });
+
+  const logoScrollZ = useTransform(logoProgress, [0, 1], [0, -280]);
+  const logoScrollScale = useTransform(logoProgress, [0, 0.40, 0.75, 1.0], [1.0, 0.92, 0.65, 0.40]);
+  const logoScrollOpacity = useTransform(logoProgress, [0, 0.25, 0.65, 1.0], [1.0, 0.95, 0.45, 0.0]);
+  const logoScrollBlur = useTransform(logoProgress, [0, 0.30, 0.70, 1.0], [0, 0.3, 2.2, 5.0]);
+  const logoScrollFilter = useTransform(logoScrollBlur, (b) => (b <= 0.2 ? "none" : `blur(${b.toFixed(1)}px)`));
+  const logoPointerEvents = useTransform(logoProgress, (pr) => (pr < 0.65 ? "auto" : "none"));
 
   // Minimalist scroll cue visible on mobile initial load
-  const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.04], [1, 0]);
+  const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.03], [1, 0]);
 
-  // 3. PHASE 2: EMERGING HEADLINE, SUBTITLE, CTA BUTTONS & STAT CARDS
-  // On 1st scroll (0.04 to 0.20), the animation executes.
-  // On 2nd scroll (0.20 to 0.50), the entire scene freezes like a still picture.
-  const textOpacity = useTransform(smoothProgress, (p) => (p < 0.04 ? 0 : Math.min(1, (p - 0.04) / 0.14)));
-  const textY = useTransform(smoothProgress, (p) => (p <= 0.20 ? 30 - (p / 0.20) * 30 : 0));
-  const textScale = useTransform(smoothProgress, (p) => (p <= 0.20 ? 0.95 + (p / 0.20) * 0.05 : 1));
-  const textPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.08 ? "auto" : "none"));
+  // =========================================================================
+  // 3. CONTENT REVEAL (MAIN HEADING, SUBHEADING & CTA BUTTONS):
+  // - After logo removal (starts at 0.110, settles by 0.200)
+  // - Revealed while house is STILL large, dominant, and close!
+  // =========================================================================
+  const textProgress = useTransform(smoothProgress, (p) => {
+    if (p <= 0.110) return 0;
+    if (p >= 0.200) return 1;
+    const t = (p - 0.110) / (0.200 - 0.110);
+    return 1 - Math.pow(1 - t, 2.5);
+  });
 
-  // 4. STAT CARDS (REVEAL ON 1ST SCROLL, FREEZE ON 2ND SCROLL, SPREAD ON 3RD SCROLL AS SCREEN SCROLLS DOWN)
-  const cardsOpacity = useTransform(smoothProgress, (p) => (p < 0.04 ? 0 : Math.min(1, (p - 0.04) / 0.14)));
-  const cardsY = useTransform(smoothProgress, (p) => (p <= 0.20 ? 25 - (p / 0.20) * 25 : 0));
-  const cardsScale = useTransform(smoothProgress, (p) => (p <= 0.20 ? 0.95 + (p / 0.20) * 0.05 : 1));
-  const cardsPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.08 ? "auto" : "none"));
+  const textOpacity = useTransform(textProgress, [0, 1], [0, 1]);
+  const textY = useTransform(textProgress, [0, 1], [60, 0]);
+  const textBlur = useTransform(textProgress, [0, 1], [8, 0]);
+  const textFilter = useTransform(textBlur, (b) => (b <= 0.2 ? "none" : `blur(${b}px)`));
+  const textScale = useTransform(textProgress, [0, 1], [0.96, 1.0]);
+  const textPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.15 ? "auto" : "none"));
 
-  // Side gap between 3 cards increases during 3rd scroll (0.50 -> 0.95)
+  // =========================================================================
+  // 4. STATS CARDS REVEAL (2-STAGE):
+  // - First scroll (p: 0.180 -> 0.240): Cards only START appearing at the bottom edge (subtle peek, low opacity).
+  // - Later scroll (p: 0.240 -> 0.420): Cards fully elevate to their prominent settled position above the floor.
+  // =========================================================================
+  const cardsProgress = useTransform(smoothProgress, (p) => {
+    if (p <= 0.180) return 0;
+    if (p <= 0.240) {
+      // First scroll checkpoint: only 25% peek at bottom edge
+      const t = (p - 0.180) / (0.240 - 0.180);
+      return t * 0.25;
+    }
+    if (p <= 0.420) {
+      // Later scroll: elevates fully from 0.25 to 1.0
+      const t = (p - 0.240) / (0.420 - 0.240);
+      const eased = t * t * (3 - 2 * t);
+      return 0.25 + eased * 0.75;
+    }
+    return 1.0;
+  });
+
+  const cardsOpacity = useTransform(cardsProgress, (cp) => {
+    if (cp <= 0) return 0;
+    if (cp <= 0.25) return (cp / 0.25) * 0.35; // Subtle peek (max 35% opacity at first scroll checkpoint)
+    return 0.35 + ((cp - 0.25) / 0.75) * 0.65; // Rises to 100% opacity during later scroll
+  });
+
+  const cardsY = useTransform(cardsProgress, [0, 0.25, 1.0], [56, 38, 0]);
+  const cardsScale = useTransform(cardsProgress, [0, 0.25, 1.0], [0.92, 0.94, 1.0]);
+  const cardsPointerEvents = useTransform(cardsProgress, (cp) => (cp >= 0.60 ? "auto" : "none"));
+
+  // Side gap between 3 cards increases during 3rd scroll (0.55 -> 0.95)
   // as the screen reaches the end of the hero container and scrolls down
   const cardSpread = useTransform(smoothProgress, (p) => {
-    if (p <= 0.50) return 0;
+    if (p <= 0.55) return 0;
     if (p <= 0.95) {
-      const t = (p - 0.50) / (0.95 - 0.50);
-      // Smooth cubic easeInOut for fluid animation
+      const t = (p - 0.55) / (0.95 - 0.55);
       const eased = t * t * (3 - 2 * t);
       return eased * spreadDistance;
     }
@@ -143,57 +254,67 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const leftCardX = useTransform(cardSpread, (v) => -v);
   const rightCardX = useTransform(cardSpread, (v) => v);
 
-  // Side dark vignettes beside the wall: reveals with 1st scroll into the settled scene
-  const sideVignetteOpacity = useTransform(smoothProgress, (p) => (p < 0.04 ? 0 : Math.min(1, (p - 0.04) / 0.14)));
-  // 5. House Cutout Parallax & Responsive Zoom:
-  // After 1st scroll (p > 0.20), the scene is frozen like a still picture!
-  // houseScaleX expands horizontally for a majestic wide architectural estate presence.
-  const houseScaleX = useTransform(smoothProgress, (p) => {
-    if (isMobile) {
-      if (p <= 0.20) {
-        const t = p / 0.20;
-        return 2.05 - t * (2.05 - 1.28);
-      }
-      return 1.28; // Freezed still picture (a little bit more wider)
-    } else {
-      if (p <= 0.20) {
-        const t = p / 0.20;
-        return 1.28 - t * (1.28 - 0.73);
-      }
-      return 0.73; // Freezed still picture (a little bit more wider)
-    }
-  });
+  // Ambient & floor shade overlay: reveals with 1st scroll into the settled scene
+  const sideVignetteOpacity = useTransform(smoothProgress, (p) => (p < 0.07 ? 0 : Math.min(1, (p - 0.07) / 0.12)));
 
-  const houseScaleY = useTransform(smoothProgress, (p) => {
-    if (isMobile) {
-      if (p <= 0.20) {
-        const t = p / 0.20;
-        return 1.85 - t * (1.85 - 1.20);
-      }
-      return 1.20;
-    } else {
-      if (p <= 0.20) {
-        const t = p / 0.20;
-        return 1.10 - t * (1.10 - 0.65);
-      }
-      return 0.65;
-    }
-  });
-
+  // =========================================================================
+  // 5. HOUSE CAMERA PULLBACK & FLOOR GROUNDING:
+  // - Step 1 (p: 0.00 -> 0.050): Moves downward ~4cm (~40px) with the camera lowering
+  // - First Scroll Checkpoint (p: 0.040 -> 0.220): House stays LARGE & DOMINANT (subtle depth: scale 1.03 -> 0.99, z: 0 -> -40px)
+  // - Later Scroll (p: 0.220 -> 0.500): Camera continues pulling backward away from the estate (scale 0.99 -> 0.88, z: -40px -> -250px)
+  // - Floor dark shadow (Layer 3B) moves in 100% synchronization throughout all phases
+  // =========================================================================
   const houseY = useTransform(smoothProgress, (p) => {
-    if (isMobile) {
-      if (p <= 0.20) {
-        const t = p / 0.20;
-        return 28 - t * (28 - -16);
-      }
-      return -16; // Freezed still picture
-    } else {
-      if (p <= 0.20) {
-        const t = p / 0.20;
-        return 58 - t * (58 - 20);
-      }
-      return 20; // Freezed still picture
+    const settleY = isMobile ? 36 : 40;
+    const stabilizeCompensation = isMobile ? 4 : 6;
+    if (p <= 0.050) {
+      const t = p / 0.050;
+      return t * t * (3 - 2 * t) * settleY;
     }
+    if (p <= 0.50) {
+      const t = (p - 0.050) / (0.50 - 0.050);
+      const eased = t * t * (3 - 2 * t);
+      return settleY - eased * stabilizeCompensation;
+    }
+    return settleY - stabilizeCompensation;
+  });
+
+  const houseZ = useTransform(smoothProgress, (p) => {
+    if (p <= 0.04) return 0;
+    if (p <= 0.22) {
+      // First scroll: subtle 3D depth movement (-40px)
+      const t = (p - 0.04) / (0.22 - 0.04);
+      const eased = t * t * (3 - 2 * t);
+      return -eased * 40;
+    }
+    if (p <= 0.50) {
+      // Later scroll: cinematic camera physically pulls backward away from the house
+      const t = (p - 0.22) / (0.50 - 0.22);
+      const eased = t * t * (3 - 2 * t);
+      return -40 - eased * (250 - 40);
+    }
+    return -250;
+  });
+
+  const houseScale = useTransform(smoothProgress, (p) => {
+    const initialScale = isMobile ? 1.06 : 1.03;
+    const stage1Scale = isMobile ? 1.02 : 0.99; // House stays large and dominant during first scroll!
+    const finalScale = isMobile ? 0.92 : 0.88;  // Pullback achieved during later scroll
+
+    if (p <= 0.04) return initialScale;
+    if (p <= 0.22) {
+      // First scroll: subtle depth only (just 3-4% reduction)
+      const t = (p - 0.04) / (0.22 - 0.04);
+      const eased = t * t * (3 - 2 * t);
+      return initialScale - eased * (initialScale - stage1Scale);
+    }
+    if (p <= 0.50) {
+      // Later scroll: camera gradually moves away
+      const t = (p - 0.22) / (0.50 - 0.22);
+      const eased = t * t * (3 - 2 * t);
+      return stage1Scale - eased * (stage1Scale - finalScale);
+    }
+    return finalScale;
   });
 
   const defaultStats = [
@@ -248,18 +369,19 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
-      className="relative w-full h-[195vh] bg-forest-950"
+      className="relative w-full h-[210vh] bg-forest-950"
     >
-      {/* Sticky Viewport Stage: Locks screen while the 3-phase emergence unfolds */}
+      {/* Sticky Viewport Stage: Locks screen while the cinematic sequence unfolds */}
       <section
         id="home"
-        className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-forest-950 text-white select-none"
+        style={{ perspective: 1200 }}
+        className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-forest-950 text-white select-none [transform-style:preserve-3d]"
       >
         {/* =========================================================================
             LAYER 1 (Z-0): BACKGROUND NATURE LANDSCAPE (Deep Parallax)
            ========================================================================= */}
         <motion.div
-          style={{ y: bgY, scale: bgScale, opacity: bgOpacity }}
+          style={{ y: bgY, z: bgZ, scale: bgScale, opacity: bgOpacity }}
           className="absolute inset-[-4%] w-[108%] h-[108%] z-0 select-none overflow-hidden pointer-events-none"
         >
           <div className="relative w-full h-full">
@@ -283,22 +405,25 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               className="absolute top-[14%] sm:top-[14%] left-1/2 -translate-x-1/2 w-[340px] xs:w-[480px] sm:w-[720px] h-[220px] sm:h-[340px] bg-gradient-radial from-solar-400/28 via-solar-300/12 to-transparent blur-[70px] sm:blur-[110px] pointer-events-none"
             />
 
-            {/* Bottom vignette to blend into ground */}
-            <div className="absolute inset-x-0 bottom-0 h-40 sm:h-48 bg-gradient-to-t from-forest-950/95 via-forest-950/50 to-transparent pointer-events-none" />
+            {/* Bottom vignette to blend into ground, kept low strictly at floor level */}
+            <div className="absolute inset-x-0 bottom-0 h-12 sm:h-16 md:h-20 bg-gradient-to-t from-forest-950/90 via-forest-950/30 to-transparent pointer-events-none" />
           </div>
         </motion.div>
 
         {/* =========================================================================
             LAYER 2A (Z-10): PHASE 1 - SOLAR LEGACY LOGO
             On mount: 1.05s load animation rising from behind house roofline!
-            On 1st scroll: smoothly transitions out.
+            On 1st scroll: moves straight backward in 3D space with blur and fades out.
            ========================================================================= */}
         <motion.div
           style={{
             y: logoScrollY,
+            z: logoScrollZ,
             scale: logoScrollScale,
             opacity: logoScrollOpacity,
+            filter: logoScrollFilter,
             pointerEvents: logoPointerEvents,
+            transformOrigin: "center center",
           }}
           className="absolute left-1/2 -translate-x-1/2 -top-2 xs:-top-1.5 sm:-top-1 md:-top-0.5 lg:top-0 z-10 flex flex-col items-center select-none w-full px-4"
         >
@@ -355,17 +480,18 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         </motion.div>
 
         {/* =========================================================================
-            LAYER 2B (Z-10): PHASE 2 - HEADLINE, SUBTITLE & CTA BUTTONS
-            Reveals on FIRST SCROLL from behind house roofline!
+            LAYER 2B (Z-18): PHASE 4 - HEADLINE, SUBTITLE & CTA BUTTONS
+            Emerges upward from behind the house roofline immediately after logo exits!
            ========================================================================= */}
         <motion.div
           style={{
             y: textY,
             scale: textScale,
             opacity: textOpacity,
+            filter: textFilter,
             pointerEvents: textPointerEvents,
           }}
-          className="absolute left-1/2 -translate-x-1/2 top-[68px] sm:top-[72px] md:top-[76px] w-full max-w-3xl sm:max-w-4xl px-4 flex flex-col items-center text-center z-25"
+          className="absolute left-1/2 -translate-x-1/2 top-[68px] sm:top-[72px] md:top-[76px] w-full max-w-3xl sm:max-w-4xl px-4 flex flex-col items-center text-center z-18"
         >
           {/* Main Headline */}
           <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-[36px] lg:text-[40px] tracking-tight text-white leading-[1.14] mb-2 sm:mb-2.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
@@ -420,48 +546,28 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         </motion.div>
 
         {/* =========================================================================
-            LAYER 2C (Z-15): AMBIENT & SIDE DARK VIGNETTES
+            LAYER 2C (Z-15): AMBIENT & FLOOR GROUND DARK OVERLAY
             Reveals on 1st scroll:
-            1. Overall background darkening across the screen (low opacity ~38-45%).
-            2. Deep dark beside the lower walls (~75-77%) and solid dark at the bottom floor.
+            1. Clean ambient darkening overlay across the top/middle for text legibility.
+            2. Dark shade strictly adjacent to floor level at the bottom (walls remain clean).
            ========================================================================= */}
         <motion.div
           style={{ opacity: sideVignetteOpacity }}
           className="absolute inset-0 z-[15] pointer-events-none select-none overflow-hidden"
         >
-          {/* Overall ambient darkening overlay: low-opacity dark tint across the upper/middle screen */}
+          {/* Overall ambient darkening overlay: low-opacity dark tint across the upper screen, clean and bright beside walls */}
           <div
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0.60) 0%, rgba(2, 8, 5, 0.48) 35%, rgba(2, 8, 5, 0.52) 65%, rgba(2, 8, 5, 0.78) 85%, #020805 100%)",
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0.55) 0%, rgba(2, 8, 5, 0.40) 28%, rgba(2, 8, 5, 0.10) 50%, rgba(2, 8, 5, 0.04) 75%, rgba(2, 8, 5, 0.12) 88%, rgba(2, 8, 5, 0.65) 94%, #020805 100%)",
             }}
           />
 
-          {/* Left side dark: starts lower beside the garage wall, opacity smoothly increasing top to bottom */}
+          {/* Bottom floor ground darkening: strictly adjacent to floor level */}
           <div
-            className="absolute bottom-0 top-[75%] sm:top-[76%] md:top-[77%] left-0 w-[30%] sm:w-[26%] lg:w-[24%]"
+            className="absolute bottom-0 top-[90%] sm:top-[91%] md:top-[92%] inset-x-0"
             style={{
-              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.25) 25%, rgba(2, 8, 5, 0.6) 55%, rgba(2, 8, 5, 0.9) 80%, #020805 100%)",
-              WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 75%, transparent 100%)",
-              maskImage: "linear-gradient(to right, rgba(0,0,0,1) 75%, transparent 100%)",
-            }}
-          />
-
-          {/* Right side dark: starts lower beside the right wall, opacity smoothly increasing top to bottom */}
-          <div
-            className="absolute bottom-0 top-[75%] sm:top-[76%] md:top-[77%] right-0 w-[30%] sm:w-[26%] lg:w-[24%]"
-            style={{
-              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.25) 25%, rgba(2, 8, 5, 0.6) 55%, rgba(2, 8, 5, 0.9) 80%, #020805 100%)",
-              WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 75%, transparent 100%)",
-              maskImage: "linear-gradient(to left, rgba(0,0,0,1) 75%, transparent 100%)",
-            }}
-          />
-
-          {/* Bottom floor ground darkening: soft lower opacity increasing to bottom */}
-          <div
-            className="absolute bottom-0 top-[84%] sm:top-[85%] inset-x-0"
-            style={{
-              background: "linear-gradient(to bottom, rgba(3, 13, 8, 0) 0%, rgba(3, 13, 8, 0.25) 40%, rgba(3, 13, 8, 0.7) 100%)",
+              background: "linear-gradient(to bottom, rgba(3, 13, 8, 0) 0%, rgba(3, 13, 8, 0.40) 40%, rgba(3, 13, 8, 0.85) 100%)",
             }}
           />
         </motion.div>
@@ -474,18 +580,18 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         <motion.div
           style={{
             y: houseY,
-            scaleX: houseScaleX,
-            scaleY: houseScaleY,
-            transformOrigin: "center 92%",
+            z: houseZ,
+            scale: houseScale,
+            transformOrigin: "center 75%",
           }}
           className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center"
         >
           {/* Horizontal Ground Contact Shadow - runs parallel to the ground directly beneath the house foundation */}
           <div
-            className="absolute -bottom-3 sm:-bottom-4 md:-bottom-6 inset-x-0 h-20 sm:h-28 md:h-36 pointer-events-none -z-10"
+            className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 inset-x-0 h-10 sm:h-12 md:h-14 pointer-events-none -z-10"
             style={{
-              background: "radial-gradient(ellipse 98% 70% at 50% 30%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 45%, rgba(0, 0, 0, 0.35) 78%, transparent 100%)",
-              filter: "blur(10px)",
+              background: "radial-gradient(ellipse 75% 50% at 50% 70%, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.45) 50%, transparent 85%)",
+              filter: "blur(6px)",
             }}
           />
 
@@ -503,7 +609,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
               priority
               sizes="(max-width: 640px) 100vw, 100vw"
               quality={100}
-              className="object-contain object-bottom sm:object-cover sm:object-[center_60%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.7)]"
+              className="object-contain object-bottom sm:object-cover sm:object-[center_60%] drop-shadow-[0_16px_28px_rgba(0,0,0,0.45)]"
               onError={() => setHouseSrc("/hero-house.png")}
             />
 
@@ -519,29 +625,35 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
         {/* =========================================================================
             LAYER 3B (Z-15): HORIZONTAL GROUND TERRAIN DARK SHADE (UNDER THE HOUSE)
-            Runs parallel to the floor across the terrain in the first scene,
-            firmly anchoring the house so it feels deeply grounded into the background.
+            Runs parallel to the floor across the terrain, strictly adjacent to floor level,
+            moving in lockstep with the house foundation so it never detaches or floats.
            ========================================================================= */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-44 sm:h-56 md:h-72 z-[15] pointer-events-none select-none"
+        <motion.div
+          style={{
+            y: houseY,
+            z: houseZ,
+            scale: houseScale,
+            transformOrigin: "center 75%",
+          }}
+          className="absolute inset-x-0 bottom-0 h-14 sm:h-18 md:h-22 z-[15] pointer-events-none select-none"
         >
           {/* Deep horizontal terrain shade parallel to the ground */}
           <div
             className="w-full h-full"
             style={{
-              background: "linear-gradient(to bottom, rgba(1, 5, 3, 0) 0%, rgba(1, 5, 3, 0.60) 30%, rgba(1, 5, 3, 0.94) 65%, #010503 100%)",
+              background: "linear-gradient(to bottom, rgba(1, 5, 3, 0) 0%, rgba(1, 5, 3, 0.35) 45%, rgba(1, 5, 3, 0.85) 80%, #010503 100%)",
             }}
           />
 
-          {/* Deep horizontal contact shadow strip running parallel to the ground */}
+          {/* Horizontal contact shadow strip running parallel to the ground under the floor foundation */}
           <div
-            className="absolute inset-x-0 bottom-8 sm:bottom-12 md:bottom-18 h-24 sm:h-32 opacity-95"
+            className="absolute inset-x-0 bottom-1 sm:bottom-2 h-6 sm:h-8 opacity-75"
             style={{
-              background: "radial-gradient(ellipse 98% 70% at 50% 50%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.90) 48%, rgba(0, 0, 0, 0.40) 80%, transparent 100%)",
-              filter: "blur(10px)",
+              background: "radial-gradient(ellipse 85% 50% at 50% 60%, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.40) 55%, transparent 85%)",
+              filter: "blur(5px)",
             }}
           />
-        </div>
+        </motion.div>
 
         {/* =========================================================================
             LAYER 4 (Z-30): 3 STAT CARDS (HEAD STARTS A LITTLE UPPER TO HOUSE FLOOR)
