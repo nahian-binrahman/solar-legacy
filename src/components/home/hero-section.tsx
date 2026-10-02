@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { motion, useTransform, useMotionValue, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,19 +47,6 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     }
   }, [mouseX, mouseY]);
 
-  // Track scroll across the pinned 280vh stage
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 95,
-    damping: 25,
-    mass: 0.8,
-    restDelta: 0.001,
-  });
-
   // Mobile and responsive dimensions detection
   const [isMobile, setIsMobile] = React.useState(false);
   const [spreadDistance, setSpreadDistance] = React.useState(60);
@@ -81,44 +68,76 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     return () => window.removeEventListener("resize", checkDimensions);
   }, []);
 
-  // Controlled scroll threshold controller:
-  // First scroll input triggers full first-scroll transition to checkpoint state (no stopping halfway).
-  // Reverse scroll reverses naturally back to top.
+  // =========================================================================
+  // AUTONOMOUS CINEMATIC TIMELINE CONTROLLER
+  // The first scroll gesture acts as a trigger, not a scrub timeline controller.
+  // Once triggered:
+  // - Plays the complete cinematic transition automatically (no stopping halfway).
+  // - Fixed duration (2.4s forward, 2.0s reverse).
+  // - On reverse scroll: smoothly reverses back to the initial loaded state.
+  // =========================================================================
+  const timelineProgress = useMotionValue(0);
+  const animControlsRef = React.useRef<{ stop: () => void } | null>(null);
+  const heroStateRef = React.useRef<"initial" | "playing_forward" | "completed" | "playing_reverse">("initial");
+
+  const getCheckpointY = React.useCallback(() => {
+    if (!containerRef.current) return window.innerHeight * 0.9;
+    return containerRef.current.offsetHeight - window.innerHeight;
+  }, []);
+
+  const playForward = React.useCallback(() => {
+    if (heroStateRef.current === "completed" || heroStateRef.current === "playing_forward") return;
+    heroStateRef.current = "playing_forward";
+    if (animControlsRef.current) animControlsRef.current.stop();
+
+    // Autonomous animation timeline: plays smoothly to completion regardless of user scroll activity
+    animControlsRef.current = animate(timelineProgress, 1, {
+      duration: 2.4,
+      ease: [0.16, 1, 0.3, 1],
+      onComplete: () => {
+        heroStateRef.current = "completed";
+      },
+    });
+
+    const checkpointY = getCheckpointY();
+    window.scrollTo({ top: checkpointY, behavior: "smooth" });
+  }, [timelineProgress, getCheckpointY]);
+
+  const playReverse = React.useCallback(() => {
+    if (heroStateRef.current === "initial" || heroStateRef.current === "playing_reverse") return;
+    heroStateRef.current = "playing_reverse";
+    if (animControlsRef.current) animControlsRef.current.stop();
+
+    // Autonomous reverse timeline: reverses smoothly to initial state
+    animControlsRef.current = animate(timelineProgress, 0, {
+      duration: 2.0,
+      ease: [0.16, 1, 0.3, 1],
+      onComplete: () => {
+        heroStateRef.current = "initial";
+      },
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [timelineProgress]);
+
   React.useEffect(() => {
-    let isAutoScrolling = false;
-    let scrollTimer: NodeJS.Timeout | null = null;
-
-    const getCheckpointY = () => {
-      if (!containerRef.current) return window.innerHeight * 0.24;
-      const totalScrollable = containerRef.current.offsetHeight - window.innerHeight;
-      return totalScrollable * 0.22;
-    };
-
     const handleWheel = (e: WheelEvent) => {
       const scrollY = window.scrollY;
       const checkpointY = getCheckpointY();
 
-      // Forward transition from top:
-      if (scrollY < 30 && e.deltaY > 5) {
-        e.preventDefault();
-        if (isAutoScrolling) return;
-        isAutoScrolling = true;
-        window.scrollTo({ top: checkpointY, behavior: "smooth" });
-        if (scrollTimer) clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-          isAutoScrolling = false;
-        }, 850);
+      // Forward trigger from top or initial:
+      if (e.deltaY > 6) {
+        if (scrollY <= 60 && heroStateRef.current !== "completed" && heroStateRef.current !== "playing_forward") {
+          e.preventDefault();
+          playForward();
+        }
       }
-      // Reverse transition from checkpoint:
-      else if (scrollY <= checkpointY + 40 && scrollY >= 30 && e.deltaY < -5) {
-        e.preventDefault();
-        if (isAutoScrolling) return;
-        isAutoScrolling = true;
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        if (scrollTimer) clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-          isAutoScrolling = false;
-        }, 850);
+      // Reverse trigger from completed/checkpoint state:
+      else if (e.deltaY < -6) {
+        if (scrollY <= checkpointY + 60 && heroStateRef.current !== "initial" && heroStateRef.current !== "playing_reverse") {
+          e.preventDefault();
+          playReverse();
+        }
       }
     };
 
@@ -133,266 +152,243 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       const scrollY = window.scrollY;
       const checkpointY = getCheckpointY();
 
-      if (scrollY < 30 && deltaY > 25) {
-        if (isAutoScrolling) return;
-        isAutoScrolling = true;
-        window.scrollTo({ top: checkpointY, behavior: "smooth" });
-        if (scrollTimer) clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-          isAutoScrolling = false;
-        }, 850);
-      } else if (scrollY <= checkpointY + 40 && scrollY >= 30 && deltaY < -25) {
-        if (isAutoScrolling) return;
-        isAutoScrolling = true;
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        if (scrollTimer) clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-          isAutoScrolling = false;
-        }, 850);
+      if (deltaY > 20) {
+        if (scrollY <= 60 && heroStateRef.current !== "completed" && heroStateRef.current !== "playing_forward") {
+          playForward();
+        }
+      } else if (deltaY < -20) {
+        if (scrollY <= checkpointY + 60 && heroStateRef.current !== "initial" && heroStateRef.current !== "playing_reverse") {
+          playReverse();
+        }
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const scrollY = window.scrollY;
+      const checkpointY = getCheckpointY();
+      if (["ArrowDown", "PageDown", " "].includes(e.key)) {
+        if (scrollY <= 60 && heroStateRef.current !== "completed" && heroStateRef.current !== "playing_forward") {
+          playForward();
+        }
+      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
+        if (scrollY <= checkpointY + 60 && heroStateRef.current !== "initial" && heroStateRef.current !== "playing_reverse") {
+          playReverse();
+        }
+      }
+    };
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const checkpointY = getCheckpointY();
+
+      if (scrollY >= checkpointY * 0.75 && heroStateRef.current === "initial") {
+        playForward();
+      } else if (scrollY <= 5 && heroStateRef.current === "completed") {
+        playReverse();
       }
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
-      if (scrollTimer) clearTimeout(scrollTimer);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleScroll);
+      if (animControlsRef.current) animControlsRef.current.stop();
     };
-  }, []);
+  }, [playForward, playReverse, getCheckpointY]);
 
   // =========================================================================
-  // PARALLAX & ANIMATION TRANSFORMS
-  // =========================================================================
-
-  // =========================================================================
-  // MULTI-STAGE ARCHITECTURAL CAMERA TIMELINE
-  // Stage 1 (p: 0.00 -> 0.050): Camera Crane Downward Settle (~4cm / ~26px)
-  // Stage 2 (p: 0.005 -> 0.145): Logo Exit & Subtle Initial Camera Depth
-  // Stage 3 (p: 0.095 -> 0.190): Content Reveal (Heading, Subtitle, Buttons) above the house
-  // Checkpoint 1 (p ~ 0.22): House stays LARGE & DOMINANT (almost original size), logo gone, text fully revealed, cards peeking at bottom
-  // Stage 4 (p: 0.220 -> 0.500): Later Scroll - Camera Pulls Backward, Deep Parallax, Cards Fully Elevate
-  // Stage 5 (p: 0.550 -> 0.950): Horizontal Card Expansion into Next Section
+  // PARALLAX & ANIMATION TRANSFORMS DRIVEN BY AUTONOMOUS TIMELINE
+  // Timeline Stages:
+  // Forward:
+  // Initial state -> Logo disappears -> House camera movement -> Content reveal -> Cards reveal -> Complete
+  // Backward:
+  // Complete state -> Cards hide -> Content disappears -> House returns -> Logo returns -> Initial
   // =========================================================================
 
   // 1. Background Nature Parallax:
-  // - First scroll: settles downward slightly (~16px desktop, ~12px mobile) and stays close (1.15 -> 1.135)
-  // - Later scroll: pulls backward into deep parallax (1.135 -> 1.08, z: -15px -> -85px)
-  const bgScale = useTransform(smoothProgress, (p) => {
+  const bgScale = useTransform(timelineProgress, (p) => {
     const initialScale = isMobile ? 1.25 : 1.15;
-    const stage1Scale = isMobile ? 1.24 : 1.135; // Kept close during first scroll!
+    const stage1Scale = isMobile ? 1.24 : 1.135; // Kept close during first scroll
     const finalScale = isMobile ? 1.18 : 1.08;
 
-    if (p <= 0.04) return initialScale;
-    if (p <= 0.22) {
-      const t = (p - 0.04) / (0.22 - 0.04);
+    if (p <= 0.05) return initialScale;
+    if (p <= 0.55) {
+      const t = (p - 0.05) / (0.55 - 0.05);
       const eased = t * t * (3 - 2 * t);
       return initialScale - eased * (initialScale - stage1Scale);
     }
-    if (p <= 0.50) {
-      const t = (p - 0.22) / (0.50 - 0.22);
-      const eased = t * t * (3 - 2 * t);
-      return stage1Scale - eased * (stage1Scale - finalScale);
-    }
-    return finalScale;
+    const t = (p - 0.55) / (1.0 - 0.55);
+    const eased = t * t * (3 - 2 * t);
+    return stage1Scale - eased * (stage1Scale - finalScale);
   });
 
-  const bgZ = useTransform(smoothProgress, (p) => {
-    if (p <= 0.04) return 0;
-    if (p <= 0.22) {
-      const t = (p - 0.04) / (0.22 - 0.04);
+  const bgZ = useTransform(timelineProgress, (p) => {
+    if (p <= 0.05) return 0;
+    if (p <= 0.55) {
+      const t = (p - 0.05) / (0.55 - 0.05);
       return -t * 15;
     }
-    if (p <= 0.50) {
-      const t = (p - 0.22) / (0.50 - 0.22);
-      const eased = t * t * (3 - 2 * t);
-      return -15 - eased * (85 - 15);
-    }
-    return -85;
+    const t = (p - 0.55) / (1.0 - 0.55);
+    const eased = t * t * (3 - 2 * t);
+    return -15 - eased * 70;
   });
 
-  const bgY = useTransform(smoothProgress, (p) => {
+  const bgY = useTransform(timelineProgress, (p) => {
     const settleY = isMobile ? 12 : 16;
     const finalY = isMobile ? 20 : 26;
-    if (p <= 0.050) {
-      const t = p / 0.050;
+    if (p <= 0.18) {
+      const t = p / 0.18;
       return t * t * (3 - 2 * t) * settleY;
     }
-    if (p <= 0.50) {
-      const t = (p - 0.050) / (0.50 - 0.050);
-      const eased = t * t * (3 - 2 * t);
-      return settleY + eased * (finalY - settleY);
-    }
-    return finalY;
+    const t = (p - 0.18) / (1.0 - 0.18);
+    const eased = t * t * (3 - 2 * t);
+    return settleY + eased * (finalY - settleY);
   });
 
-  // Background opacity transition when cards reveal (maintaining house prominence)
-  const bgOpacity = useTransform(smoothProgress, [0, 0.24, 0.35, 0.85, 1], [1, 1, 0.85, 0.80, 0.35]);
+  const bgOpacity = useTransform(timelineProgress, [0, 0.55, 0.70, 1], [1, 1, 0.90, 0.82]);
 
   // Sun flare parallax, dynamic radiance, and cursor/touch drift
   const sunGlowX = useTransform(mouseX, [0, 1], [-25, 25]);
-  const sunGlowY = useTransform(smoothProgress, [0, 1], [0, 40]);
-  const sunGlowScale = useTransform(smoothProgress, [0, 1], [1, 1.25]);
-  const sunGlowOpacity = useTransform(smoothProgress, (p) => (p <= 0.22 ? 1 - (p / 0.22) * 0.85 : 0.15));
+  const sunGlowY = useTransform(timelineProgress, [0, 1], [0, 40]);
+  const sunGlowScale = useTransform(timelineProgress, [0, 1], [1, 1.25]);
+  const sunGlowOpacity = useTransform(timelineProgress, (p) => (p <= 0.50 ? 1 - (p / 0.50) * 0.80 : 0.20));
 
   // =========================================================================
   // 2. LOGO BEHAVIOR:
-  // - Step 1: Moves downward ~4cm (~26px) with the house
+  // - Step 1: Moves downward ~4cm (~26px) with the crane settle
   // - Step 2: Moves straight backward in 3D depth slowly and fades away
-  // - Fades out completely by p = 0.145 before content reveal completes
+  // - Disappears completely by p = 0.38
   // =========================================================================
-  const logoProgress = useTransform(smoothProgress, (p) => {
-    const pStart = 0.005;
-    const pEnd = 0.145;
+  const logoProgress = useTransform(timelineProgress, (p) => {
+    const pStart = 0.01;
+    const pEnd = 0.38;
     if (p <= pStart) return 0;
     if (p >= pEnd) return 1;
     const t = (p - pStart) / (pEnd - pStart);
     return t * t * (3 - 2 * t);
   });
 
-  const logoScrollY = useTransform(smoothProgress, (p) => {
+  const logoScrollY = useTransform(timelineProgress, (p) => {
     const settleY = isMobile ? 22 : 26;
-    if (p <= 0.050) {
-      const t = p / 0.050;
+    if (p <= 0.18) {
+      const t = p / 0.18;
       return t * t * (3 - 2 * t) * settleY;
     }
     return settleY;
   });
 
-  const logoScrollZ = useTransform(logoProgress, [0, 1], [0, -280]);
-  const logoScrollScale = useTransform(logoProgress, [0, 0.40, 0.75, 1.0], [1.0, 0.92, 0.65, 0.40]);
-  const logoScrollOpacity = useTransform(logoProgress, [0, 0.25, 0.65, 1.0], [1.0, 0.95, 0.40, 0.0]);
-  const logoScrollBlur = useTransform(logoProgress, [0, 0.30, 0.70, 1.0], [0, 0.3, 2.0, 4.8]);
+  const logoScrollZ = useTransform(logoProgress, [0, 1], [0, -300]);
+  const logoScrollScale = useTransform(logoProgress, [0, 0.35, 0.70, 1.0], [1.0, 0.92, 0.62, 0.35]);
+  const logoScrollOpacity = useTransform(logoProgress, [0, 0.20, 0.65, 1.0], [1.0, 0.95, 0.35, 0.0]);
+  const logoScrollBlur = useTransform(logoProgress, [0, 0.30, 0.70, 1.0], [0, 0.4, 2.2, 5.0]);
   const logoScrollFilter = useTransform(logoScrollBlur, (b) => (b <= 0.2 ? "none" : `blur(${b.toFixed(1)}px)`));
-  const logoPointerEvents = useTransform(logoProgress, (pr) => (pr < 0.65 ? "auto" : "none"));
+  const logoPointerEvents = useTransform(logoProgress, (pr) => (pr < 0.50 ? "auto" : "none"));
 
-  // Minimalist scroll cue visible on mobile initial load
-  const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.03], [1, 0]);
+  const scrollIndicatorOpacity = useTransform(timelineProgress, [0, 0.06], [1, 0]);
 
   // =========================================================================
   // 3. CONTENT REVEAL (MAIN HEADING, SUBHEADING & CTA BUTTONS):
-  // - After logo removal (starts at 0.095, settles by 0.190)
+  // - Follows logo exit (starts at 0.30, settles by 0.62)
   // - Emerges to foreground above the house (z-25)
   // - House is STILL large, dominant, and close!
   // =========================================================================
-  const textProgress = useTransform(smoothProgress, (p) => {
-    if (p <= 0.095) return 0;
-    if (p >= 0.190) return 1;
-    const t = (p - 0.095) / (0.190 - 0.095);
+  const textProgress = useTransform(timelineProgress, (p) => {
+    if (p <= 0.30) return 0;
+    if (p >= 0.62) return 1;
+    const t = (p - 0.30) / (0.62 - 0.30);
     return 1 - Math.pow(1 - t, 2.5);
   });
 
   const textOpacity = useTransform(textProgress, [0, 1], [0, 1]);
-  const textY = useTransform(textProgress, [0, 1], [50, 0]);
-  const textBlur = useTransform(textProgress, [0, 1], [8, 0]);
+  const textY = useTransform(textProgress, [0, 1], [45, 0]);
+  const textBlur = useTransform(textProgress, [0, 1], [6, 0]);
   const textFilter = useTransform(textBlur, (b) => (b <= 0.2 ? "none" : `blur(${b}px)`));
-  const textScale = useTransform(textProgress, [0, 1], [0.95, 1.0]);
-  const textPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.12 ? "auto" : "none"));
+  const textScale = useTransform(textProgress, [0, 1], [0.94, 1.0]);
+  const textPointerEvents = useTransform(timelineProgress, (p) => (p >= 0.45 ? "auto" : "none"));
 
   // =========================================================================
-  // 4. STATS CARDS REVEAL (2-STAGE):
-  // - First scroll (p: 0.180 -> 0.240): Cards only START appearing at the bottom edge (subtle peek, low opacity).
-  // - Later scroll (p: 0.240 -> 0.440): Cards fully elevate to their prominent settled position above the floor.
+  // 4. STATS CARDS REVEAL (REVEALS LAST):
+  // - Starts emerging at p = 0.60, completes by p = 0.95
   // =========================================================================
-  const cardsProgress = useTransform(smoothProgress, (p) => {
-    if (p <= 0.180) return 0;
-    if (p <= 0.240) {
-      // First scroll checkpoint: only 25% peek at bottom edge
-      const t = (p - 0.180) / (0.240 - 0.180);
-      return t * 0.25;
-    }
-    if (p <= 0.440) {
-      // Later scroll: elevates fully from 0.25 to 1.0
-      const t = (p - 0.240) / (0.440 - 0.240);
-      const eased = t * t * (3 - 2 * t);
-      return 0.25 + eased * 0.75;
-    }
-    return 1.0;
+  const cardsProgress = useTransform(timelineProgress, (p) => {
+    if (p <= 0.60) return 0;
+    if (p >= 0.95) return 1.0;
+    const t = (p - 0.60) / (0.95 - 0.60);
+    return t * t * (3 - 2 * t);
   });
 
-  const cardsOpacity = useTransform(cardsProgress, (cp) => {
-    if (cp <= 0) return 0;
-    if (cp <= 0.25) return (cp / 0.25) * 0.30; // Subtle peek (max 30% opacity at first scroll checkpoint)
-    return 0.30 + ((cp - 0.25) / 0.75) * 0.70; // Rises to 100% opacity during later scroll
-  });
+  const cardsOpacity = useTransform(cardsProgress, [0, 0.15, 1], [0, 0.20, 1]);
+  const cardsY = useTransform(cardsProgress, [0, 1], [55, 0]);
+  const cardsScale = useTransform(cardsProgress, [0, 1], [0.92, 1.0]);
+  const cardsPointerEvents = useTransform(cardsProgress, (cp) => (cp >= 0.70 ? "auto" : "none"));
 
-  const cardsY = useTransform(cardsProgress, [0, 0.25, 1.0], [56, 36, 0]);
-  const cardsScale = useTransform(cardsProgress, [0, 0.25, 1.0], [0.92, 0.94, 1.0]);
-  const cardsPointerEvents = useTransform(cardsProgress, (cp) => (cp >= 0.60 ? "auto" : "none"));
-
-  // Side gap between 3 cards increases during 3rd scroll (0.55 -> 0.95)
-  // as the screen reaches the end of the hero container and scrolls down
-  const cardSpread = useTransform(smoothProgress, (p) => {
-    if (p <= 0.55) return 0;
-    if (p <= 0.95) {
-      const t = (p - 0.55) / (0.95 - 0.55);
-      const eased = t * t * (3 - 2 * t);
-      return eased * spreadDistance;
-    }
-    return spreadDistance;
+  const cardSpread = useTransform(timelineProgress, (p) => {
+    if (p <= 0.70) return 0;
+    if (p >= 0.98) return spreadDistance;
+    const t = (p - 0.70) / (0.98 - 0.70);
+    return t * t * (3 - 2 * t) * spreadDistance;
   });
 
   const leftCardX = useTransform(cardSpread, (v) => -v);
   const rightCardX = useTransform(cardSpread, (v) => v);
 
-  // Ambient & floor shade overlay: reveals with 1st scroll into the settled scene
-  const sideVignetteOpacity = useTransform(smoothProgress, (p) => (p < 0.07 ? 0 : Math.min(1, (p - 0.07) / 0.12)));
+  // Ambient & floor shade overlay: reveals into the settled scene
+  const sideVignetteOpacity = useTransform(timelineProgress, (p) => {
+    if (p < 0.15) return 0;
+    if (p >= 0.45) return 1;
+    return (p - 0.15) / (0.45 - 0.15);
+  });
 
   // =========================================================================
   // 5. HOUSE CAMERA PULLBACK & FLOOR GROUNDING:
-  // - Step 1 (p: 0.00 -> 0.050): Moves downward ~4cm (~26px) with the camera lowering
-  // - First Scroll Checkpoint (p: 0.040 -> 0.220): House stays LARGE & DOMINANT (scale 1.03 -> 1.01, z: 0 -> -20px)
-  // - Later Scroll (p: 0.220 -> 0.500): Camera gradually pulls backward away from the estate (scale 1.01 -> 0.88, z: -20px -> -240px)
+  // - Step 1 (p: 0.00 -> 0.18): Settle downward ~4cm (~26px)
+  // - Stage 1 (p: 0.00 -> 0.55): House stays LARGE & DOMINANT (scale 1.03 -> 1.01, z: 0 -> -20px)
+  // - Stage 2 (p: 0.55 -> 1.00): Camera gradually pulls backward away from the estate (scale 1.01 -> 0.88, z: -20px -> -240px)
   // - Floor dark shadow (Layer 3B) moves in 100% synchronization throughout all phases
   // =========================================================================
-  const houseY = useTransform(smoothProgress, (p) => {
+  const houseY = useTransform(timelineProgress, (p) => {
     const settleY = isMobile ? 22 : 26;
-    if (p <= 0.050) {
-      const t = p / 0.050;
+    if (p <= 0.18) {
+      const t = p / 0.18;
       return t * t * (3 - 2 * t) * settleY;
     }
     return settleY;
   });
 
-  const houseZ = useTransform(smoothProgress, (p) => {
-    if (p <= 0.04) return 0;
-    if (p <= 0.22) {
-      // First scroll: subtle 3D depth movement (-20px)
-      const t = (p - 0.04) / (0.22 - 0.04);
+  const houseZ = useTransform(timelineProgress, (p) => {
+    if (p <= 0.05) return 0;
+    if (p <= 0.55) {
+      const t = (p - 0.05) / (0.55 - 0.05);
       const eased = t * t * (3 - 2 * t);
       return -eased * 20;
     }
-    if (p <= 0.50) {
-      // Later scroll: cinematic camera physically pulls backward away from the house
-      const t = (p - 0.22) / (0.50 - 0.22);
-      const eased = t * t * (3 - 2 * t);
-      return -20 - eased * (240 - 20);
-    }
-    return -240;
+    const t = (p - 0.55) / (1.0 - 0.55);
+    const eased = t * t * (3 - 2 * t);
+    return -20 - eased * (240 - 20);
   });
 
-  const houseScale = useTransform(smoothProgress, (p) => {
+  const houseScale = useTransform(timelineProgress, (p) => {
     const initialScale = isMobile ? 1.06 : 1.03;
     const stage1Scale = isMobile ? 1.04 : 1.01; // House stays large and dominant during first scroll!
     const finalScale = isMobile ? 0.92 : 0.88;  // Pullback achieved during later scroll
 
-    if (p <= 0.04) return initialScale;
-    if (p <= 0.22) {
-      // First scroll: subtle depth only (visual size virtually unchanged)
-      const t = (p - 0.04) / (0.22 - 0.04);
+    if (p <= 0.05) return initialScale;
+    if (p <= 0.55) {
+      const t = (p - 0.05) / (0.55 - 0.05);
       const eased = t * t * (3 - 2 * t);
       return initialScale - eased * (initialScale - stage1Scale);
     }
-    if (p <= 0.50) {
-      // Later scroll: camera gradually moves away
-      const t = (p - 0.22) / (0.50 - 0.22);
-      const eased = t * t * (3 - 2 * t);
-      return stage1Scale - eased * (stage1Scale - finalScale);
-    }
-    return finalScale;
+    const t = (p - 0.55) / (1.0 - 0.55);
+    const eased = t * t * (3 - 2 * t);
+    return stage1Scale - eased * (stage1Scale - finalScale);
   });
 
   const defaultStats = [
@@ -447,7 +443,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
-      className="relative w-full h-[210vh] bg-forest-950"
+      className="relative w-full h-[180vh] bg-forest-950"
     >
       {/* Sticky Viewport Stage: Locks screen while the cinematic sequence unfolds */}
       <section
