@@ -81,26 +81,109 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     return () => window.removeEventListener("resize", checkDimensions);
   }, []);
 
+  // Controlled scroll threshold controller:
+  // First scroll input triggers full first-scroll transition to checkpoint state (no stopping halfway).
+  // Reverse scroll reverses naturally back to top.
+  React.useEffect(() => {
+    let isAutoScrolling = false;
+    let scrollTimer: NodeJS.Timeout | null = null;
+
+    const getCheckpointY = () => {
+      if (!containerRef.current) return window.innerHeight * 0.24;
+      const totalScrollable = containerRef.current.offsetHeight - window.innerHeight;
+      return totalScrollable * 0.22;
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      const scrollY = window.scrollY;
+      const checkpointY = getCheckpointY();
+
+      // Forward transition from top:
+      if (scrollY < 30 && e.deltaY > 5) {
+        e.preventDefault();
+        if (isAutoScrolling) return;
+        isAutoScrolling = true;
+        window.scrollTo({ top: checkpointY, behavior: "smooth" });
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+          isAutoScrolling = false;
+        }, 850);
+      }
+      // Reverse transition from checkpoint:
+      else if (scrollY <= checkpointY + 40 && scrollY >= 30 && e.deltaY < -5) {
+        e.preventDefault();
+        if (isAutoScrolling) return;
+        isAutoScrolling = true;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+          isAutoScrolling = false;
+        }, 850);
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaY = touchStartY - touchEndY;
+      const scrollY = window.scrollY;
+      const checkpointY = getCheckpointY();
+
+      if (scrollY < 30 && deltaY > 25) {
+        if (isAutoScrolling) return;
+        isAutoScrolling = true;
+        window.scrollTo({ top: checkpointY, behavior: "smooth" });
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+          isAutoScrolling = false;
+        }, 850);
+      } else if (scrollY <= checkpointY + 40 && scrollY >= 30 && deltaY < -25) {
+        if (isAutoScrolling) return;
+        isAutoScrolling = true;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+          isAutoScrolling = false;
+        }, 850);
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+      if (scrollTimer) clearTimeout(scrollTimer);
+    };
+  }, []);
+
   // =========================================================================
   // PARALLAX & ANIMATION TRANSFORMS
   // =========================================================================
 
   // =========================================================================
   // MULTI-STAGE ARCHITECTURAL CAMERA TIMELINE
-  // Stage 1 (p: 0.00 -> 0.050): Camera Crane Downward Settle (~4cm / ~40px)
-  // Stage 2 (p: 0.005 -> 0.150): Logo Exit & Subtle Initial Camera Depth
-  // Stage 3 (p: 0.110 -> 0.200): Content Reveal while House Stays Large & Dominant
-  // Checkpoint 1 (p ~ 0.22): House is large & dominant, logo gone, text fully revealed, cards just peeking at bottom
+  // Stage 1 (p: 0.00 -> 0.050): Camera Crane Downward Settle (~4cm / ~26px)
+  // Stage 2 (p: 0.005 -> 0.145): Logo Exit & Subtle Initial Camera Depth
+  // Stage 3 (p: 0.095 -> 0.190): Content Reveal (Heading, Subtitle, Buttons) above the house
+  // Checkpoint 1 (p ~ 0.22): House stays LARGE & DOMINANT (almost original size), logo gone, text fully revealed, cards peeking at bottom
   // Stage 4 (p: 0.220 -> 0.500): Later Scroll - Camera Pulls Backward, Deep Parallax, Cards Fully Elevate
   // Stage 5 (p: 0.550 -> 0.950): Horizontal Card Expansion into Next Section
   // =========================================================================
 
   // 1. Background Nature Parallax:
-  // - First scroll: settles downward slightly (~18px desktop, ~14px mobile) and stays close (1.15 -> 1.135)
-  // - Later scroll: pulls backward into deep parallax (1.135 -> 1.08, z: -18px -> -85px)
+  // - First scroll: settles downward slightly (~16px desktop, ~12px mobile) and stays close (1.15 -> 1.135)
+  // - Later scroll: pulls backward into deep parallax (1.135 -> 1.08, z: -15px -> -85px)
   const bgScale = useTransform(smoothProgress, (p) => {
     const initialScale = isMobile ? 1.25 : 1.15;
-    const stage1Scale = isMobile ? 1.23 : 1.135; // Kept close during first scroll!
+    const stage1Scale = isMobile ? 1.24 : 1.135; // Kept close during first scroll!
     const finalScale = isMobile ? 1.18 : 1.08;
 
     if (p <= 0.04) return initialScale;
@@ -121,19 +204,19 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (p <= 0.04) return 0;
     if (p <= 0.22) {
       const t = (p - 0.04) / (0.22 - 0.04);
-      return -t * 18;
+      return -t * 15;
     }
     if (p <= 0.50) {
       const t = (p - 0.22) / (0.50 - 0.22);
       const eased = t * t * (3 - 2 * t);
-      return -18 - eased * (85 - 18);
+      return -15 - eased * (85 - 15);
     }
     return -85;
   });
 
   const bgY = useTransform(smoothProgress, (p) => {
-    const settleY = isMobile ? 14 : 18;
-    const finalY = isMobile ? 22 : 28;
+    const settleY = isMobile ? 12 : 16;
+    const finalY = isMobile ? 20 : 26;
     if (p <= 0.050) {
       const t = p / 0.050;
       return t * t * (3 - 2 * t) * settleY;
@@ -157,13 +240,13 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   // =========================================================================
   // 2. LOGO BEHAVIOR:
-  // - Step 1: Moves downward ~4cm (~40px) with the house
+  // - Step 1: Moves downward ~4cm (~26px) with the house
   // - Step 2: Moves straight backward in 3D depth slowly and fades away
-  // - Fades out completely by p = 0.150 before content reveal completes
+  // - Fades out completely by p = 0.145 before content reveal completes
   // =========================================================================
   const logoProgress = useTransform(smoothProgress, (p) => {
     const pStart = 0.005;
-    const pEnd = 0.150;
+    const pEnd = 0.145;
     if (p <= pStart) return 0;
     if (p >= pEnd) return 1;
     const t = (p - pStart) / (pEnd - pStart);
@@ -171,7 +254,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   });
 
   const logoScrollY = useTransform(smoothProgress, (p) => {
-    const settleY = isMobile ? 36 : 40;
+    const settleY = isMobile ? 22 : 26;
     if (p <= 0.050) {
       const t = p / 0.050;
       return t * t * (3 - 2 * t) * settleY;
@@ -181,8 +264,8 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   const logoScrollZ = useTransform(logoProgress, [0, 1], [0, -280]);
   const logoScrollScale = useTransform(logoProgress, [0, 0.40, 0.75, 1.0], [1.0, 0.92, 0.65, 0.40]);
-  const logoScrollOpacity = useTransform(logoProgress, [0, 0.25, 0.65, 1.0], [1.0, 0.95, 0.45, 0.0]);
-  const logoScrollBlur = useTransform(logoProgress, [0, 0.30, 0.70, 1.0], [0, 0.3, 2.2, 5.0]);
+  const logoScrollOpacity = useTransform(logoProgress, [0, 0.25, 0.65, 1.0], [1.0, 0.95, 0.40, 0.0]);
+  const logoScrollBlur = useTransform(logoProgress, [0, 0.30, 0.70, 1.0], [0, 0.3, 2.0, 4.8]);
   const logoScrollFilter = useTransform(logoScrollBlur, (b) => (b <= 0.2 ? "none" : `blur(${b.toFixed(1)}px)`));
   const logoPointerEvents = useTransform(logoProgress, (pr) => (pr < 0.65 ? "auto" : "none"));
 
@@ -191,27 +274,28 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   // =========================================================================
   // 3. CONTENT REVEAL (MAIN HEADING, SUBHEADING & CTA BUTTONS):
-  // - After logo removal (starts at 0.110, settles by 0.200)
-  // - Revealed while house is STILL large, dominant, and close!
+  // - After logo removal (starts at 0.095, settles by 0.190)
+  // - Emerges to foreground above the house (z-25)
+  // - House is STILL large, dominant, and close!
   // =========================================================================
   const textProgress = useTransform(smoothProgress, (p) => {
-    if (p <= 0.110) return 0;
-    if (p >= 0.200) return 1;
-    const t = (p - 0.110) / (0.200 - 0.110);
+    if (p <= 0.095) return 0;
+    if (p >= 0.190) return 1;
+    const t = (p - 0.095) / (0.190 - 0.095);
     return 1 - Math.pow(1 - t, 2.5);
   });
 
   const textOpacity = useTransform(textProgress, [0, 1], [0, 1]);
-  const textY = useTransform(textProgress, [0, 1], [60, 0]);
+  const textY = useTransform(textProgress, [0, 1], [50, 0]);
   const textBlur = useTransform(textProgress, [0, 1], [8, 0]);
   const textFilter = useTransform(textBlur, (b) => (b <= 0.2 ? "none" : `blur(${b}px)`));
-  const textScale = useTransform(textProgress, [0, 1], [0.96, 1.0]);
-  const textPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.15 ? "auto" : "none"));
+  const textScale = useTransform(textProgress, [0, 1], [0.95, 1.0]);
+  const textPointerEvents = useTransform(smoothProgress, (p) => (p >= 0.12 ? "auto" : "none"));
 
   // =========================================================================
   // 4. STATS CARDS REVEAL (2-STAGE):
   // - First scroll (p: 0.180 -> 0.240): Cards only START appearing at the bottom edge (subtle peek, low opacity).
-  // - Later scroll (p: 0.240 -> 0.420): Cards fully elevate to their prominent settled position above the floor.
+  // - Later scroll (p: 0.240 -> 0.440): Cards fully elevate to their prominent settled position above the floor.
   // =========================================================================
   const cardsProgress = useTransform(smoothProgress, (p) => {
     if (p <= 0.180) return 0;
@@ -220,9 +304,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
       const t = (p - 0.180) / (0.240 - 0.180);
       return t * 0.25;
     }
-    if (p <= 0.420) {
+    if (p <= 0.440) {
       // Later scroll: elevates fully from 0.25 to 1.0
-      const t = (p - 0.240) / (0.420 - 0.240);
+      const t = (p - 0.240) / (0.440 - 0.240);
       const eased = t * t * (3 - 2 * t);
       return 0.25 + eased * 0.75;
     }
@@ -231,11 +315,11 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   const cardsOpacity = useTransform(cardsProgress, (cp) => {
     if (cp <= 0) return 0;
-    if (cp <= 0.25) return (cp / 0.25) * 0.35; // Subtle peek (max 35% opacity at first scroll checkpoint)
-    return 0.35 + ((cp - 0.25) / 0.75) * 0.65; // Rises to 100% opacity during later scroll
+    if (cp <= 0.25) return (cp / 0.25) * 0.30; // Subtle peek (max 30% opacity at first scroll checkpoint)
+    return 0.30 + ((cp - 0.25) / 0.75) * 0.70; // Rises to 100% opacity during later scroll
   });
 
-  const cardsY = useTransform(cardsProgress, [0, 0.25, 1.0], [56, 38, 0]);
+  const cardsY = useTransform(cardsProgress, [0, 0.25, 1.0], [56, 36, 0]);
   const cardsScale = useTransform(cardsProgress, [0, 0.25, 1.0], [0.92, 0.94, 1.0]);
   const cardsPointerEvents = useTransform(cardsProgress, (cp) => (cp >= 0.60 ? "auto" : "none"));
 
@@ -259,51 +343,45 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   // =========================================================================
   // 5. HOUSE CAMERA PULLBACK & FLOOR GROUNDING:
-  // - Step 1 (p: 0.00 -> 0.050): Moves downward ~4cm (~40px) with the camera lowering
-  // - First Scroll Checkpoint (p: 0.040 -> 0.220): House stays LARGE & DOMINANT (subtle depth: scale 1.03 -> 0.99, z: 0 -> -40px)
-  // - Later Scroll (p: 0.220 -> 0.500): Camera continues pulling backward away from the estate (scale 0.99 -> 0.88, z: -40px -> -250px)
+  // - Step 1 (p: 0.00 -> 0.050): Moves downward ~4cm (~26px) with the camera lowering
+  // - First Scroll Checkpoint (p: 0.040 -> 0.220): House stays LARGE & DOMINANT (scale 1.03 -> 1.01, z: 0 -> -20px)
+  // - Later Scroll (p: 0.220 -> 0.500): Camera gradually pulls backward away from the estate (scale 1.01 -> 0.88, z: -20px -> -240px)
   // - Floor dark shadow (Layer 3B) moves in 100% synchronization throughout all phases
   // =========================================================================
   const houseY = useTransform(smoothProgress, (p) => {
-    const settleY = isMobile ? 36 : 40;
-    const stabilizeCompensation = isMobile ? 4 : 6;
+    const settleY = isMobile ? 22 : 26;
     if (p <= 0.050) {
       const t = p / 0.050;
       return t * t * (3 - 2 * t) * settleY;
     }
-    if (p <= 0.50) {
-      const t = (p - 0.050) / (0.50 - 0.050);
-      const eased = t * t * (3 - 2 * t);
-      return settleY - eased * stabilizeCompensation;
-    }
-    return settleY - stabilizeCompensation;
+    return settleY;
   });
 
   const houseZ = useTransform(smoothProgress, (p) => {
     if (p <= 0.04) return 0;
     if (p <= 0.22) {
-      // First scroll: subtle 3D depth movement (-40px)
+      // First scroll: subtle 3D depth movement (-20px)
       const t = (p - 0.04) / (0.22 - 0.04);
       const eased = t * t * (3 - 2 * t);
-      return -eased * 40;
+      return -eased * 20;
     }
     if (p <= 0.50) {
       // Later scroll: cinematic camera physically pulls backward away from the house
       const t = (p - 0.22) / (0.50 - 0.22);
       const eased = t * t * (3 - 2 * t);
-      return -40 - eased * (250 - 40);
+      return -20 - eased * (240 - 20);
     }
-    return -250;
+    return -240;
   });
 
   const houseScale = useTransform(smoothProgress, (p) => {
     const initialScale = isMobile ? 1.06 : 1.03;
-    const stage1Scale = isMobile ? 1.02 : 0.99; // House stays large and dominant during first scroll!
+    const stage1Scale = isMobile ? 1.04 : 1.01; // House stays large and dominant during first scroll!
     const finalScale = isMobile ? 0.92 : 0.88;  // Pullback achieved during later scroll
 
     if (p <= 0.04) return initialScale;
     if (p <= 0.22) {
-      // First scroll: subtle depth only (just 3-4% reduction)
+      // First scroll: subtle depth only (visual size virtually unchanged)
       const t = (p - 0.04) / (0.22 - 0.04);
       const eased = t * t * (3 - 2 * t);
       return initialScale - eased * (initialScale - stage1Scale);
@@ -480,102 +558,23 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         </motion.div>
 
         {/* =========================================================================
-            LAYER 2B (Z-18): PHASE 4 - HEADLINE, SUBTITLE & CTA BUTTONS
-            Emerges upward from behind the house roofline immediately after logo exits!
-           ========================================================================= */}
-        <motion.div
-          style={{
-            y: textY,
-            scale: textScale,
-            opacity: textOpacity,
-            filter: textFilter,
-            pointerEvents: textPointerEvents,
-          }}
-          className="absolute left-1/2 -translate-x-1/2 top-[68px] sm:top-[72px] md:top-[76px] w-full max-w-3xl sm:max-w-4xl px-4 flex flex-col items-center text-center z-18"
-        >
-          {/* Main Headline */}
-          <h1 className="font-heading font-extrabold text-xl xs:text-2xl sm:text-3xl md:text-[36px] lg:text-[40px] tracking-tight text-white leading-[1.14] mb-2 sm:mb-2.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-3xl">
-            {content?.title ? (
-              content.title
-            ) : (
-              <>
-                Architectural Solar <br className="hidden sm:inline" />
-                &amp; Renewable Energy Systems
-              </>
-            )}
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-xs xs:text-[13px] sm:text-[14.5px] md:text-base text-beige-100/90 font-light leading-relaxed max-w-sm sm:max-w-2xl mb-3 sm:mb-3.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] px-2">
-            {content?.subtitle ||
-              "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency."}
-          </p>
-
-          {/* CTA Buttons - Mobile and Desktop Optimized (a little bit bigger) */}
-          <div className="flex flex-row items-center justify-center gap-2.5 xs:gap-3.5 sm:gap-4 w-full max-w-xs sm:max-w-none px-2">
-            <Button
-              variant="solar"
-              size="default"
-              className="flex-1 sm:flex-initial font-bold text-forest-950 bg-gradient-to-r from-solar-400 to-solar-500 hover:from-solar-300 hover:to-solar-400 shadow-[0_4px_22px_rgba(245,158,11,0.45)] hover:shadow-[0_6px_28px_rgba(245,158,11,0.6)] group cursor-pointer h-9.5 sm:h-10 md:h-11 px-4.5 sm:px-6 text-xs sm:text-[13px] md:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl border-none"
-              onMouseEnter={() => sounds.playHover()}
-              onClick={() => {
-                sounds.playPrimaryClick();
-                const el = document.getElementById("quote") || document.getElementById("contact");
-                el?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              <span className="truncate">{content?.primaryCtaText || "Get Solar Quote"}</span>
-              <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1 shrink-0" />
-            </Button>
-
-            <Button
-              variant="forestOutline"
-              size="default"
-              className="flex-1 sm:flex-initial border border-solar-400/40 bg-[#06140e]/95 hover:bg-[#0d261b] hover:border-solar-400 text-white cursor-pointer backdrop-blur-md h-9.5 sm:h-10 md:h-11 px-4.5 sm:px-6 text-xs sm:text-[13px] md:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.8)] font-semibold"
-              onMouseEnter={() => sounds.playHover()}
-              onClick={() => {
-                sounds.playSecondaryClick();
-                const el = document.getElementById("solutions") || document.getElementById("about");
-                el?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              <Sparkles className="w-4 h-4 text-solar-400 mr-1.5 shrink-0" />
-              <span className="truncate">{content?.secondaryCtaText || "Explore Solutions"}</span>
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* =========================================================================
-            LAYER 2C (Z-15): AMBIENT & FLOOR GROUND DARK OVERLAY
-            Reveals on 1st scroll:
-            1. Clean ambient darkening overlay across the top/middle for text legibility.
-            2. Dark shade strictly adjacent to floor level at the bottom (walls remain clean).
+            LAYER 2C (Z-[12]): AMBIENT OVERLAY FOR CONTRAST
            ========================================================================= */}
         <motion.div
           style={{ opacity: sideVignetteOpacity }}
-          className="absolute inset-0 z-[15] pointer-events-none select-none overflow-hidden"
+          className="absolute inset-0 z-[12] pointer-events-none select-none overflow-hidden"
         >
-          {/* Overall ambient darkening overlay: low-opacity dark tint across the upper screen, clean and bright beside walls */}
           <div
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0.55) 0%, rgba(2, 8, 5, 0.40) 28%, rgba(2, 8, 5, 0.10) 50%, rgba(2, 8, 5, 0.04) 75%, rgba(2, 8, 5, 0.12) 88%, rgba(2, 8, 5, 0.65) 94%, #020805 100%)",
-            }}
-          />
-
-          {/* Bottom floor ground darkening: strictly adjacent to floor level */}
-          <div
-            className="absolute bottom-0 top-[90%] sm:top-[91%] md:top-[92%] inset-x-0"
-            style={{
-              background: "linear-gradient(to bottom, rgba(3, 13, 8, 0) 0%, rgba(3, 13, 8, 0.40) 40%, rgba(3, 13, 8, 0.85) 100%)",
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0.50) 0%, rgba(2, 8, 5, 0.35) 28%, rgba(2, 8, 5, 0.08) 50%, rgba(2, 8, 5, 0.03) 75%, rgba(2, 8, 5, 0.10) 88%, rgba(2, 8, 5, 0.60) 94%, #020805 100%)",
             }}
           />
         </motion.div>
 
         {/* =========================================================================
-            LAYER 3 (Z-20): HOUSE CUTOUT (Foreground Parallax Plane)
-            Mobile: object-contain object-bottom so the FULL HOUSE WIDTH (garage to entrance) is 100% visible without clipping.
-            Desktop: object-cover sm:object-[center_60%] for seamless widescreen landscape alignment.
+            LAYER 3 (Z-10): HOUSE CUTOUT (Foreground Architectural Plane)
+            Layer order: Background (z-0) -> House (z-10) -> Dark Floor Shadow (z-15) -> Content (z-25) -> Cards (z-30)
            ========================================================================= */}
         <motion.div
           style={{
@@ -584,9 +583,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             scale: houseScale,
             transformOrigin: "center 75%",
           }}
-          className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-20 pointer-events-none select-none flex items-end justify-center"
+          className="absolute inset-x-0 bottom-0 sm:inset-[-4%] sm:w-[108%] sm:h-[108%] z-10 pointer-events-none select-none flex items-end justify-center"
         >
-          {/* Horizontal Ground Contact Shadow - runs parallel to the ground directly beneath the house foundation */}
+          {/* Horizontal Ground Contact Shadow */}
           <div
             className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 inset-x-0 h-10 sm:h-12 md:h-14 pointer-events-none -z-10"
             style={{
@@ -624,9 +623,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
         </motion.div>
 
         {/* =========================================================================
-            LAYER 3B (Z-15): HORIZONTAL GROUND TERRAIN DARK SHADE (UNDER THE HOUSE)
-            Runs parallel to the floor across the terrain, strictly adjacent to floor level,
-            moving in lockstep with the house foundation so it never detaches or floats.
+            LAYER 3B (Z-15): HORIZONTAL GROUND TERRAIN DARK SHADE (ATTACHED TO BASELINE)
+            Layer order: Background (z-0) -> House (z-10) -> Dark floor shadow (z-15) -> Content (z-25) -> Cards (z-30)
+            Blends the house foundation into the ground, grounding it during all scroll states so it never floats.
            ========================================================================= */}
         <motion.div
           style={{
@@ -635,24 +634,85 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
             scale: houseScale,
             transformOrigin: "center 75%",
           }}
-          className="absolute inset-x-0 bottom-0 h-14 sm:h-18 md:h-22 z-[15] pointer-events-none select-none"
+          className="absolute inset-x-0 bottom-0 h-28 sm:h-36 md:h-44 z-15 pointer-events-none select-none"
         >
-          {/* Deep horizontal terrain shade parallel to the ground */}
+          {/* Deep horizontal grounding terrain gradient */}
           <div
             className="w-full h-full"
             style={{
-              background: "linear-gradient(to bottom, rgba(1, 5, 3, 0) 0%, rgba(1, 5, 3, 0.35) 45%, rgba(1, 5, 3, 0.85) 80%, #010503 100%)",
+              background: "linear-gradient(to bottom, rgba(2, 8, 5, 0) 0%, rgba(2, 8, 5, 0.40) 30%, rgba(2, 8, 5, 0.85) 70%, #020805 100%)",
             }}
           />
 
-          {/* Horizontal contact shadow strip running parallel to the ground under the floor foundation */}
+          {/* Foundation baseline contact shadow strip */}
           <div
-            className="absolute inset-x-0 bottom-1 sm:bottom-2 h-6 sm:h-8 opacity-75"
+            className="absolute inset-x-0 bottom-3 sm:bottom-5 md:bottom-7 h-12 sm:h-16 opacity-85"
             style={{
-              background: "radial-gradient(ellipse 85% 50% at 50% 60%, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.40) 55%, transparent 85%)",
-              filter: "blur(5px)",
+              background: "radial-gradient(ellipse 85% 55% at 50% 60%, rgba(0, 0, 0, 0.90) 0%, rgba(0, 0, 0, 0.55) 50%, rgba(0, 0, 0, 0.15) 80%, transparent 100%)",
+              filter: "blur(6px)",
             }}
           />
+        </motion.div>
+
+        {/* =========================================================================
+            LAYER 2B (Z-25): PHASE 4 - HEADLINE, SUBTITLE & CTA BUTTONS
+            Layer order: Background (z-0) -> House (z-10) -> Dark floor shadow (z-15) -> Content (z-25) -> Cards (z-30)
+            Emerges in the foreground ABOVE the house roof so buttons are ALWAYS 100% visible!
+           ========================================================================= */}
+        <motion.div
+          style={{
+            y: textY,
+            scale: textScale,
+            opacity: textOpacity,
+            filter: textFilter,
+            pointerEvents: textPointerEvents,
+          }}
+          className="absolute left-1/2 -translate-x-1/2 top-[64px] sm:top-[68px] md:top-[72px] w-full max-w-3xl sm:max-w-4xl px-4 flex flex-col items-center text-center z-25"
+        >
+          {/* Main Headline - Line breaks strictly matched to reference */}
+          <h1 className="font-heading font-extrabold text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[42px] tracking-tight text-white leading-[1.12] mb-2 sm:mb-2.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-2xl text-center">
+            Architectural Solar <br />
+            &amp; Renewable Energy Systems
+          </h1>
+
+          {/* Subtitle - Centered alignment, matched width & spacing */}
+          <p className="text-xs xs:text-[13px] sm:text-[14.5px] md:text-base text-beige-100/90 font-light leading-relaxed max-w-sm sm:max-w-xl md:max-w-2xl mb-3.5 sm:mb-4.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] px-2 text-center">
+            {content?.subtitle ||
+              "Precision-engineered solar integrations designed to harmonize luxury architectural aesthetics with cutting-edge microinverter yield efficiency."}
+          </p>
+
+          {/* CTA Buttons - Fully visible below subheading, never covered by roof */}
+          <div className="flex flex-row items-center justify-center gap-2.5 xs:gap-3.5 sm:gap-4 w-full max-w-xs sm:max-w-none px-2">
+            <Button
+              variant="solar"
+              size="default"
+              className="flex-1 sm:flex-initial font-bold text-forest-950 bg-gradient-to-r from-solar-400 to-solar-500 hover:from-solar-300 hover:to-solar-400 shadow-[0_4px_22px_rgba(245,158,11,0.45)] hover:shadow-[0_6px_28px_rgba(245,158,11,0.6)] group cursor-pointer h-9.5 sm:h-10 md:h-11 px-4.5 sm:px-6 text-xs sm:text-[13px] md:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl border-none"
+              onMouseEnter={() => sounds.playHover()}
+              onClick={() => {
+                sounds.playPrimaryClick();
+                const el = document.getElementById("quote") || document.getElementById("contact");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              <span className="truncate">{content?.primaryCtaText || "Get Solar Quote"}</span>
+              <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1 shrink-0" />
+            </Button>
+
+            <Button
+              variant="forestOutline"
+              size="default"
+              className="flex-1 sm:flex-initial border border-solar-400/40 bg-[#06140e]/95 hover:bg-[#0d261b] hover:border-solar-400 text-white cursor-pointer backdrop-blur-md h-9.5 sm:h-10 md:h-11 px-4.5 sm:px-6 text-xs sm:text-[13px] md:text-sm justify-center hover:scale-[1.03] transition-all active:scale-95 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.8)] font-semibold"
+              onMouseEnter={() => sounds.playHover()}
+              onClick={() => {
+                sounds.playSecondaryClick();
+                const el = document.getElementById("solutions") || document.getElementById("about");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              <Sparkles className="w-4 h-4 text-solar-400 mr-1.5 shrink-0" />
+              <span className="truncate">{content?.secondaryCtaText || "Explore Solutions"}</span>
+            </Button>
+          </div>
         </motion.div>
 
         {/* =========================================================================
