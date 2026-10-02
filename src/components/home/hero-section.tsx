@@ -104,8 +104,9 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     phaseRef.current = 1;
     if (heroAnimRef.current) heroAnimRef.current.stop();
 
+    // Exactly 3 seconds duration for the entire first scroll sequence
     heroAnimRef.current = animate(heroProgress, 1, {
-      duration: 2.2,
+      duration: 3.0,
       ease: [0.16, 1, 0.3, 1],
     });
 
@@ -150,7 +151,7 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
     if (heroAnimRef.current) heroAnimRef.current.stop();
 
     heroAnimRef.current = animate(heroProgress, 0, {
-      duration: 1.8,
+      duration: 2.2,
       ease: [0.16, 1, 0.3, 1],
     });
 
@@ -268,9 +269,20 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   }, [playHeroForward, playCardsForward, playCardsReverse, playHeroReverse, getCheckpoints, heroProgress, cardProgress]);
 
   // =========================================================================
-  // 1. FIRST SCROLL SEQUENCE (HERO TIMELINE):
-  // Handles: Logo exit, house camera settle, background parallax, heading/buttons reveal,
-  // and initial compact cards appearance (ZERO card spread, fixed compact gaps).
+  // 1. FIRST SCROLL SEQUENCE (HERO TIMELINE - EXACT 3-SECOND CINEMATIC DURATION):
+  // 0.0s – 0.8s (p: 0.00 -> 0.27):
+  // - Hero scene slightly lowers (~4cm / ~26px).
+  // - Logo starts moving backward in depth.
+  // - Background begins subtle parallax.
+  // 0.8s – 1.8s (p: 0.27 -> 0.60):
+  // - Logo continues moving away and fades gradually.
+  // - House starts subtle camera pullback (subtle depth, large dominant scale maintained).
+  // 1.8s – 3.0s (p: 0.60 -> 1.00):
+  // - Heading + subheading + buttons smoothly reveal above the house (z-25).
+  // - House remains dominant.
+  // - Background settles.
+  // - Compact cards appear in fixed position.
+  // - First scroll state completes.
   // =========================================================================
 
   // Background Nature Parallax:
@@ -285,7 +297,8 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   const bgY = useTransform(heroProgress, (p) => {
     const settleY = isMobile ? 12 : 16;
-    return p * p * (3 - 2 * p) * settleY;
+    const t = Math.min(1, p / 0.27); // Lowers during 0.0s - 0.8s
+    return t * t * (3 - 2 * t) * settleY;
   });
 
   const bgOpacity = useTransform(heroProgress, [0, 1], [1, 0.95]);
@@ -294,12 +307,14 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const sunGlowX = useTransform(mouseX, [0, 1], [-25, 25]);
   const sunGlowY = useTransform(heroProgress, [0, 1], [0, 30]);
   const sunGlowScale = useTransform(heroProgress, [0, 1], [1, 1.15]);
-  const sunGlowOpacity = useTransform(heroProgress, [0, 0.6, 1], [1, 0.4, 0.25]);
+  const sunGlowOpacity = useTransform(heroProgress, [0, 0.6, 1], [1, 0.45, 0.25]);
 
-  // Logo Behavior: Moves down with settle, travels straight back into 3D depth, fades out
+  // Logo Behavior:
+  // 0.0s - 0.8s (p: 0.00 -> 0.27): Lowers with settle and starts moving backward in 3D depth
+  // 0.8s - 1.8s (p: 0.27 -> 0.60): Continues moving away and fades gradually to 0
   const logoProgress = useTransform(heroProgress, (p) => {
-    const pStart = 0.01;
-    const pEnd = 0.42;
+    const pStart = 0.02;
+    const pEnd = 0.58; // Disappears by ~1.75s
     if (p <= pStart) return 0;
     if (p >= pEnd) return 1;
     const t = (p - pStart) / (pEnd - pStart);
@@ -308,25 +323,50 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
 
   const logoScrollY = useTransform(heroProgress, (p) => {
     const settleY = isMobile ? 22 : 26;
-    const t = Math.min(1, p / 0.25);
+    const t = Math.min(1, p / 0.27); // Lowers over 0s - 0.8s
     return t * t * (3 - 2 * t) * settleY;
   });
 
-  const logoScrollZ = useTransform(logoProgress, [0, 1], [0, -300]);
+  const logoScrollZ = useTransform(logoProgress, [0, 1], [0, -320]);
   const logoScrollScale = useTransform(logoProgress, [0, 0.35, 0.70, 1.0], [1.0, 0.92, 0.62, 0.35]);
-  const logoScrollOpacity = useTransform(logoProgress, [0, 0.20, 0.65, 1.0], [1.0, 0.95, 0.35, 0.0]);
+  const logoScrollOpacity = useTransform(logoProgress, [0, 0.25, 0.65, 1.0], [1.0, 0.95, 0.35, 0.0]);
   const logoScrollBlur = useTransform(logoProgress, [0, 0.30, 0.70, 1.0], [0, 0.4, 2.2, 5.0]);
   const logoScrollFilter = useTransform(logoScrollBlur, (b) => (b <= 0.2 ? "none" : `blur(${b.toFixed(1)}px)`));
   const logoPointerEvents = useTransform(logoProgress, (pr) => (pr < 0.50 ? "auto" : "none"));
 
-  const scrollIndicatorOpacity = useTransform(heroProgress, [0, 0.08], [1, 0]);
+  const scrollIndicatorOpacity = useTransform(heroProgress, [0, 0.10], [1, 0]);
+
+  // House Camera Movement:
+  // 0.0s - 0.8s (p: 0.00 -> 0.27): Lowers slightly (~26px / ~4cm)
+  // 0.8s - 1.8s (p: 0.27 -> 0.60): Starts subtle camera pullback, maintains large dominant scale
+  // 1.8s - 3.0s (p: 0.60 -> 1.00): House remains dominant as content settles
+  const houseY = useTransform(heroProgress, (p) => {
+    const settleY = isMobile ? 22 : 26;
+    const t = Math.min(1, p / 0.27);
+    return t * t * (3 - 2 * t) * settleY;
+  });
+
+  const houseZ = useTransform(heroProgress, (p) => {
+    if (p <= 0.27) return 0;
+    const t = (p - 0.27) / (1.0 - 0.27);
+    return -t * 20; // Subtle depth only (-20px)
+  });
+
+  const houseScale = useTransform(heroProgress, (p) => {
+    const initialScale = isMobile ? 1.06 : 1.03;
+    const stage1Scale = isMobile ? 1.04 : 1.01; // Maintained large and dominant!
+    if (p <= 0.27) return initialScale;
+    const t = (p - 0.27) / (1.0 - 0.27);
+    const eased = t * t * (3 - 2 * t);
+    return initialScale - eased * (initialScale - stage1Scale);
+  });
 
   // Content Reveal (Heading, Subheading & CTA Buttons):
-  // Follows logo exit, foregrounded at z-25 above house roof
+  // 1.8s – 3.0s (p: 0.60 -> 1.00): Smoothly reveals in foreground above house (z-25)
   const textProgress = useTransform(heroProgress, (p) => {
-    if (p <= 0.32) return 0;
-    if (p >= 0.72) return 1;
-    const t = (p - 0.32) / (0.72 - 0.32);
+    if (p <= 0.58) return 0; // Starts right at 1.75s as logo finishes exit
+    if (p >= 0.95) return 1; // Fully settles by 2.85s
+    const t = (p - 0.58) / (0.95 - 0.58);
     return 1 - Math.pow(1 - t, 2.5);
   });
 
@@ -335,37 +375,20 @@ export function HeroSection({ content, statsData }: HeroSectionProps) {
   const textBlur = useTransform(textProgress, [0, 1], [6, 0]);
   const textFilter = useTransform(textBlur, (b) => (b <= 0.2 ? "none" : `blur(${b}px)`));
   const textScale = useTransform(textProgress, [0, 1], [0.94, 1.0]);
-  const textPointerEvents = useTransform(heroProgress, (p) => (p >= 0.55 ? "auto" : "none"));
-
-  // House Camera Movement in First Scroll:
-  // House stays LARGE & DOMINANT (almost same visual size, subtle depth only, grounded at baseline)
-  const houseY = useTransform(heroProgress, (p) => {
-    const settleY = isMobile ? 22 : 26;
-    const t = Math.min(1, p / 0.25);
-    return t * t * (3 - 2 * t) * settleY;
-  });
-
-  const houseZ = useTransform(heroProgress, [0, 1], [0, -20]);
-
-  const houseScale = useTransform(heroProgress, (p) => {
-    const initialScale = isMobile ? 1.06 : 1.03;
-    const stage1Scale = isMobile ? 1.04 : 1.01; // Kept large and dominant!
-    const t = p * p * (3 - 2 * p);
-    return initialScale - t * (initialScale - stage1Scale);
-  });
+  const textPointerEvents = useTransform(heroProgress, (p) => (p >= 0.70 ? "auto" : "none"));
 
   // Cards Appearance in First Scroll:
-  // Cards appear at the bottom in their fixed, compact position with UNCHANGED gaps
-  const cardsOpacity = useTransform(heroProgress, [0.45, 0.85], [0, 1]);
-  const cardsY = useTransform(heroProgress, [0.45, 0.85], [18, 0]);
-  const cardsScale = useTransform(heroProgress, [0.45, 0.85], [0.97, 1.0]);
-  const cardsPointerEvents = useTransform(heroProgress, (p) => (p >= 0.65 ? "auto" : "none"));
+  // Appears during 1.8s – 3.0s (p: 0.65 -> 0.95) at the bottom in compact position with UNCHANGED gaps
+  const cardsOpacity = useTransform(heroProgress, [0.65, 0.95], [0, 1]);
+  const cardsY = useTransform(heroProgress, [0.65, 0.95], [16, 0]);
+  const cardsScale = useTransform(heroProgress, [0.65, 0.95], [0.97, 1.0]);
+  const cardsPointerEvents = useTransform(heroProgress, (p) => (p >= 0.75 ? "auto" : "none"));
 
   // Ambient overlay for contrast:
   const sideVignetteOpacity = useTransform(heroProgress, (p) => {
-    if (p < 0.15) return 0;
-    if (p >= 0.50) return 1;
-    return (p - 0.15) / (0.50 - 0.15);
+    if (p < 0.25) return 0;
+    if (p >= 0.65) return 1;
+    return (p - 0.25) / (0.65 - 0.25);
   });
 
   // =========================================================================
